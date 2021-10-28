@@ -84,7 +84,6 @@ export const Table = forwardRef((props, ref) => {
   };
   const sortChampionShip = ()=>{
     let arrToSort = totalPointsdrivers.sort((a,b)=>{return b.puntos-a.puntos})
-    console.log(arrToSort)
     setTotalPointsdrivers(arrToSort)
     forceUpdate()
   }
@@ -95,11 +94,18 @@ export const Table = forwardRef((props, ref) => {
   }
   const forceUpdate = useForceUpdate();
   const handleChangeStateOpenC = () => {
-    openC ? setOpenC(false) : setOpenC(true);
+    if(openC){
+      setOpenC(false)
+      handleChangeCloseHoverTrack()
+      handleCloseTrackSelected()
+    }else{
+      setOpenC(true)
+      handleChangeCloseHoverTrack()
+      handleCloseTrackSelected()
+    }
     forceUpdate();
   };
   const setDataWallBackground =async (result) => {
-    
     let thereAreDriver = !result.pista.piloto
       ? false
       : result.pista.piloto;

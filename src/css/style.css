@@ -612,8 +612,8 @@ button:hover {
 .img-driver-fl {
   filter: grayscale(100%);
   width: 100%;
+  height: 100%;
   transition: 200ms;
-  
 }
 
 .img-driver-fl:hover {
@@ -893,6 +893,13 @@ button:hover {
   width: 100%;
   height: 100%;
   z-index: 1;
+}
+.general-container-2{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
 }
 .grid-r-drivers{
   display: grid;

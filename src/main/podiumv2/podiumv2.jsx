@@ -8,10 +8,11 @@ import {
 import alonso from "../images/alonso.jpg";
 import { CardsPodium } from "./cardsPodium";
 import { getData } from "../../until/fetch";
+import { LoadingAwait } from "../loading/loadingAwait";
 export const PodiumV2 = forwardRef((props, ref) => {
   const [open, setOpen] = useState(false),
     [tracksCh, setTracksCh] = useState(false),
-    [driversVitaeCh, setDriversVitaeCh] = useState(false),
+    [loading, setLoading] = useState(true),
     [drivers, setDrivers] = useState(false),
     [allWinners, setAllWinners] = useState(false),
     [openCP, setOpenCP] = useState(false);
@@ -21,17 +22,17 @@ export const PodiumV2 = forwardRef((props, ref) => {
       handleChangeOpen(paramtracksCh, paramdriversVitaeCh);
     },
     callFnHandleClose() {
-      handleClose()
+      handleClose();
     },
   }));
   const handleChangeOpen = (paramtracksCh, paramdriversVitaeCh) => {
+    childRefLA.current.callFnHandleOpen("loading");
     setTracksCh(paramtracksCh);
-    console.log(paramtracksCh)
-    setDrivers(paramdriversVitaeCh)
-    getWinners(paramdriversVitaeCh)
+    setDrivers(paramdriversVitaeCh);
+    getWinners(paramdriversVitaeCh);
     setTimeout(() => {
       setOpen(true);
-    }, 200); 
+    }, 200);
     setOpenCP(false);
     handleCloseCP();
   };
@@ -39,9 +40,10 @@ export const PodiumV2 = forwardRef((props, ref) => {
     setOpen(false);
     setOpenCP(false);
     handleCloseCP();
-    handleCloseCP()
+    handleCloseCP();
   };
   const childRefCP = useRef();
+  const childRefLA = useRef();
   const handleOpenCP = (response) => {
     childRefCP.current.callFnHandleOpen(response);
   };
@@ -49,41 +51,51 @@ export const PodiumV2 = forwardRef((props, ref) => {
     childRefCP.current.callFnCloseOpen();
   };
   const handleOpenCp = (value) => {
-    getData10Drivers(value).then((response)=>{
-      if(response){
+    getData10Drivers(value).then((response) => {
+      if (response) {
         setOpen(false);
         setOpenCP(true);
         handleOpenCP(response);
       }
-    })
- 
+    });
   };
   const handleClosenCp = () => {
     setOpen(true);
     setOpenCP(false);
     handleCloseCP();
   };
-  const getData10Drivers=(track)=>{
-    return new Promise((resolve)=>{
-      let filterWinners = drivers.filter((result)=>{return result.pistaCampeonato._id===track})
-      resolve(filterWinners)
-    })
-  }
-  const getWinners=async(arr)=>{
-    let images = new Object
-    let filterWinners = arr.filter((result)=>{return result.puntos>24})
-    filterWinners.map(async(result)=>{
-      let url = `/getImagesPilots/${result.piloto.carpetaPiloto}`
-      await getData(url).then((response)=>{
-        
-        images[ filterWinners.indexOf(result)]={
-          image: response
+  const getData10Drivers = (track) => {
+    return new Promise((resolve) => {
+      let filterWinners = drivers.filter((result) => {
+        return result.pistaCampeonato._id === track;
+      });
+      resolve(filterWinners);
+    });
+  };
+  const getWinners = async (arr) => {
+    let images = new Object();
+    let filterWinners = arr.filter((result) => {
+      return result.puntos > 24;
+    });
+    filterWinners.map(async (result) => {
+      let url = `/getImagesPilots/${result.piloto.carpetaPiloto}`;
+      await getData(url).then((response) => {
+        if (response) {
+          images[filterWinners.indexOf(result)] = {
+            image: response,
+          };
+          if (filterWinners.indexOf(result) === filterWinners.length - 1) {
+            childRefLA.current.callFnHandleClose();
+            setLoading(false);
+          }
+        } else {
+          childRefLA.current.callFnHandleOpen("error");
         }
-      })
-    })
-    setAllWinners(images)
-  }
-  
+      });
+    });
+    setAllWinners(images);
+  };
+
   const choseAnimation = (pos) => {
     if (pos % 2 === 0) {
       if (open) {
@@ -100,42 +112,42 @@ export const PodiumV2 = forwardRef((props, ref) => {
     }
   };
   const principal = () => {
-    if(tracksCh&&typeof allWinners==="object"){
+    if (tracksCh && typeof allWinners === "object") {
       return (
         <>
           <div
             className={
-              open
-                ? "general-container index-2"
-                : "general-container index-0"
+              open ? "general-container index-2" : "general-container index-0"
             }
           >
             {tracksCh.map((result) => {
-              let i = tracksCh.indexOf(result)
-              if(result.estado){
+              let i = tracksCh.indexOf(result);
+              if (result.estado) {
                 return (
                   <div className={choseAnimation(result.posicion)}>
-                    <img className="img-container-podium" src={allWinners[i]?allWinners[i].image:false} alt="" />
+                    <img
+                      className="img-container-podium"
+                      src={allWinners[i] ? allWinners[i].image : false}
+                      alt=""
+                    />
                     <small
-                      onClick={()=>handleOpenCp(result.pista._id)}
+                      onClick={() => handleOpenCp(result.pista._id)}
                       className="text-podium secondary-color"
                     >
                       {result.pista.nombre}
                     </small>
                   </div>
                 );
-              }else{
-                return null
+              } else {
+                return null;
               }
-
             })}
           </div>
         </>
       );
-    }else{
-      return null
+    } else {
+      return null;
     }
-
   };
   const buttonCloseCP = () => {
     return (
@@ -158,10 +170,24 @@ export const PodiumV2 = forwardRef((props, ref) => {
       </div>
     );
   };
+  const SwitchLoading = () => {
+    if (loading) {
+      return <LoadingAwait ref={childRefLA} />;
+    } else {
+      return (
+        <>
+          <div className="container-btn-cp-closed">
+            <LoadingAwait ref={childRefLA} />
+          </div>
+          {principal()}
+          {buttonCloseCP()}
+        </>
+      );
+    }
+  };
   return (
     <>
-      {principal()}
-      {buttonCloseCP()}
+      {SwitchLoading()}
       <CardsPodium ref={childRefCP} />
     </>
   );

@@ -11,6 +11,7 @@ import { Rdrivers } from "../rulete-drivers/rulete-drivers";
 import { getData } from "../../until/fetch";
 import { DataDriver } from "../data-driver/dataDriver";
 import useForceUpdate from "use-force-update";
+import { LoadingAwait } from "../loading/loadingAwait";
 function useInterval(callback, delay) {
   const savedCallback = useRef();
   useEffect(() => {
@@ -38,6 +39,7 @@ function Tilt(props) {
 export const CardsPodium = forwardRef((props, ref) => {
   const [open, setOpen] = useState(false),
     [loading, setLoading] = useState(true),
+    [loadingA, setLoadingA] = useState(true),
     [previousChangeWall, setPreviousChangeWall] = useState(false),
     [drivers, setDrivers] = useState(false),
     [lastDrivers, setLastDrivers] = useState(false),
@@ -60,6 +62,7 @@ export const CardsPodium = forwardRef((props, ref) => {
   );
   const childRefDR = useRef();
   const childRef = useRef();
+  const childRefLA = useRef();
   useImperativeHandle(ref, () => ({
     callFnHandleOpen(drivers) {
       handleOpen(drivers);
@@ -100,6 +103,7 @@ export const CardsPodium = forwardRef((props, ref) => {
     childRefDR.current.callFnOpenRuleteType(value, type);
   };
   const handleOpen = async (drivers) => {
+    childRefLA.current.callFnHandleOpen("loading");
     let lstDrivers = [];
     await drivers.map((driver) => {
       if (drivers.indexOf(driver) > 2) {
@@ -121,12 +125,20 @@ export const CardsPodium = forwardRef((props, ref) => {
   };
   const getWinners = async (arr) => {
     let images = new Object();
-    arr.map(async (result) => {
+    await arr.map(async (result) => {
       let url = `/getImagesPilots/${result.piloto.carpetaPiloto}`;
       await getData(url).then((response) => {
-        images[arr.indexOf(result)] = {
-          image: response,
-        };
+        if (response) {
+          images[arr.indexOf(result)] = {
+            image: response,
+          };
+          if (arr.indexOf(result) === arr.length - 1) {
+            childRefLA.current.callFnHandleClose();
+            setLoadingA(false);
+          }
+        } else {
+          childRefLA.current.callFnHandleOpen("error");
+        }
       });
     });
     return images;
@@ -177,10 +189,14 @@ export const CardsPodium = forwardRef((props, ref) => {
                             : "cap-wall index-2 "
                         }
                       ></div>
-                      <img
-                        src={images[1] ? images[1].image : false}
-                        className="img-driver-fl"
-                      />
+                      {loadingA ? (
+                        <LoadingAwait ref={childRefLA} />
+                      ) : (
+                        <img
+                          src={images[1] ? images[1].image : false}
+                          className="img-driver-fl"
+                        />
+                      )}
                     </div>
                   </div>
                 </Tilt>
@@ -203,10 +219,14 @@ export const CardsPodium = forwardRef((props, ref) => {
                             : "cap-wall index-2"
                         }
                       ></div>
-                      <img
-                        src={images[0] ? images[0].image : false}
-                        className="img-driver-fl"
-                      />
+                      {loadingA ? (
+                        <LoadingAwait ref={childRefLA} />
+                      ) : (
+                        <img
+                          src={images[0] ? images[0].image : false}
+                          className="img-driver-fl"
+                        />
+                      )}
                     </div>
                   </div>
                 </Tilt>
@@ -215,7 +235,7 @@ export const CardsPodium = forwardRef((props, ref) => {
                     <div
                       className="general-card card3-podium"
                       onClick={() =>
-                        switchAction(drivers[3].piloto, "brounce-shadow")
+                        switchAction(drivers[2].piloto, "brounce-shadow")
                       }
                     >
                       <div className="text-hover-card-driver text-card-podium">
@@ -229,10 +249,14 @@ export const CardsPodium = forwardRef((props, ref) => {
                             : "cap-wall index-2"
                         }
                       ></div>
-                      <img
-                        src={images[2] ? images[2].image : false}
-                        className="img-driver-fl"
-                      />
+                      {loadingA ? (
+                        <LoadingAwait ref={childRefLA} />
+                      ) : (
+                        <img
+                          src={images[2] ? images[2].image : false}
+                          className="img-driver-fl"
+                        />
+                      )}
                     </div>
                   </div>
                 </Tilt>
@@ -243,9 +267,8 @@ export const CardsPodium = forwardRef((props, ref) => {
                 <a
                   onClick={
                     openRdrivers
-                      ? ()=>handleChangecloseRdrivers()
-                      : () =>
-                          handleChangeOpenRdrivers(lastDrivers, "review")
+                      ? () => handleChangecloseRdrivers()
+                      : () => handleChangeOpenRdrivers(lastDrivers, "review")
                   }
                   className="input-autocomplete "
                 >
@@ -263,7 +286,7 @@ export const CardsPodium = forwardRef((props, ref) => {
             >
               <div className="general-container">
                 {/* <h1>Hi</h1> */}
-                <Rdrivers ref={childRefDR} openData={switchAction}/>
+                <Rdrivers ref={childRefDR} openData={switchAction} />
               </div>
             </div>
           </div>
@@ -273,10 +296,22 @@ export const CardsPodium = forwardRef((props, ref) => {
       return null;
     }
   };
+  const SwitchLoading = () => {
+    if (loadingA) {
+      return <LoadingAwait ref={childRefLA} />;
+    } else {
+      return (
+        <>
+          <LoadingAwait ref={childRefLA} />
+          {ContainerCards()}
+        </>
+      );
+    }
+  };
   return (
     <>
-      {<DataDriver ref={childRef} />}
-      {ContainerCards()}
+      <DataDriver ref={childRef} />
+      {SwitchLoading()}
     </>
   );
 });

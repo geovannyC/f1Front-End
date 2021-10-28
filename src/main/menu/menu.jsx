@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 export default function Menu(props) {
-  const [open, setOpen] = useState(true),
+  const [open, setOpen] = useState(false),
     [loading, setLoading] = useState(true),
     [currentOption, setCurrentOption] = useState(false);
   useEffect(() => {
