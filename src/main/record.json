@@ -1,0 +1,104 @@
+{
+  "pilotos": [
+    {
+      "escuderia": "Mercedes",
+      "alias": "",
+      "nombre": "Hamilton"
+    },
+    {
+      "escuderia": "Mercedes",
+      "alias": "",
+      "nombre": "Bottas"
+    },
+    {
+      "escuderia": "Red Bull",
+      "alias": "Di Resta",
+      "nombre": "Verstappen"
+    },
+    {
+      "escuderia": "Red Bull",
+      "alias": "",
+      "nombre": "Perez"
+    },
+    {
+      "escuderia": "McLaren",
+      "alias": "",
+      "nombre": "Ricciardo"
+    },
+    {
+      "escuderia": "McLaren",
+      "alias": "",
+      "nombre": "Norris"
+    },
+    {
+      "escuderia": "Aston Martin",
+      "alias": "",
+      "nombre": "Vettel"
+    },
+    {
+      "escuderia": "Aston Martin",
+      "alias": "Webber",
+      "nombre": "Stroll"
+    },
+    {
+      "escuderia": "Alphine",
+      "alias": "",
+      "nombre": "Alonso"
+    },
+    {
+      "escuderia": "Alphine",
+      "alias": "Hulkenberg",
+      "nombre": "Ocon"
+    },
+    {
+      "escuderia": "Ferrari",
+      "alias": "Maldonado",
+      "nombre": "Leclerc"
+    },
+    {
+      "escuderia": "Ferrari",
+      "alias": "Sutil",
+      "nombre": "Sainz"
+    },
+    {
+      "escuderia": "Alpha Tauri",
+      "alias": "Massa",
+      "nombre": "Gasly"
+    },
+    {
+      "escuderia": "Alpha Tauri",
+      "alias": "Verne",
+      "nombre": "Tsunoda"
+    },
+    {
+      "escuderia": "Alfa Romeo",
+      "alias": "",
+      "nombre": "Raikkonen"
+    },
+    {
+      "escuderia": "Alfa Romeo",
+      "alias": "Button",
+      "nombre": "Giovinazzi"
+    },
+    {
+      "escuderia": "Hass",
+      "alias": "Chilton",
+      "nombre": "Schumacher"
+    },
+    {
+      "escuderia": "Hass",
+      "alias": "Grosjean",
+      "nombre": "Mazepin"
+    },
+    {
+      "escuderia": "Williams",
+      "alias": "Gutierrez",
+      "nombre": "Russell"
+    },
+    {
+      "escuderia": "Williams",
+      "alias": "Bianchi",
+      "nombre": "Latifi"
+    }
+  ]
+}

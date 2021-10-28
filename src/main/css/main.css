@@ -1,0 +1,308 @@
+/* //////////////////////////////////////////////////////////////////
+[ FONT ]*/
+
+
+  @font-face {
+    font-family: 'Formula1';
+    src: url('../fonts/f1-font/Formula1-Bold_web_0.ttf') format('truetype'),
+         url('../fonts/f1-font/Formula1-Regular_web_0.ttf') format('truetype'),
+         url('../fonts/f1-font/Formula1-Wide_web_0.ttf') format('truetype')
+  }
+
+*{
+  font-family: "Formula1", "Bold";
+}
+header {
+  background-color: rgba(0, 0, 0, 0.425);
+  /* border-bottom: 1px solid #000000; */
+  position: fixed;
+  width: 100%;
+  height: 5%;
+  z-index: 2;
+}
+header ul {
+  margin: 8px auto;
+  padding: 0 20px;
+  text-align: center;
+}
+.containerTittle{
+  width: 15%;
+  padding-left:  3%;
+  padding-top: 3%;
+  position: fixed;
+  z-index: 2;
+  
+}
+.containerTittle h1{
+  width: auto;
+  color: #fff;
+  text-align: justify;
+}
+.containerTittle h2{
+  top: 0;
+  left: 0;
+  color: #1e2501;
+  font-size: 100px;
+  z-index: 5;
+  align-items: center;
+  text-align: center;
+}
+
+header ul li {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 300;
+  text-transform: uppercase;
+  display: inline-block;
+  padding: 4px 10px;
+  margin: 0px 40px;
+}
+/*//////////////////////////////////////////////////////////////////
+[ RESTYLE TAG ]*/
+* {
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+}
+
+body,
+html {
+  height: 100%;
+}
+
+
+a {
+  margin: 0px;
+  transition: all 0.4s;
+  -webkit-transition: all 0.4s;
+  -o-transition: all 0.4s;
+  -moz-transition: all 0.4s;
+}
+a:focus {
+  outline: none !important;
+}
+
+/* ------------------------------------ */
+h1,
+h2,
+h3,
+h4,
+h5,
+title,
+h6 {
+  margin: 0px;
+}
+
+p {
+  margin: 0px;
+}
+
+ul,
+li {
+  
+  list-style-type: none;
+  /* cursor: pointer; */
+}
+header ul
+li:hover {
+  transform: scale(1.2, 1.2);
+  border: 1px solid #fff;
+  border-radius: 5px;
+  /* transform: translateY(5px); */
+  transition: all .2s;
+}
+
+/* ------------------------------------ */
+input {
+  display: block;
+  outline: none;
+  border: none !important;
+}
+
+textarea {
+  display: block;
+  outline: none;
+}
+
+textarea:focus,
+input:focus {
+  border-color: transparent !important;
+}
+
+/* ------------------------------------ */
+button {
+  outline: none !important;
+  border: none;
+  background: transparent;
+}
+
+iframe {
+  border: none !important;
+}
+
+/*//////////////////////////////////////////////////////////////////
+[ Utiliti ]*/
+
+/*//////////////////////////////////////////////////////////////////
+[ Table ]*/
+
+.limiter {
+  width: 100%;
+  margin: 0 0;
+}
+
+.container-table100 {
+  width: 100%;
+  min-height: 100vh;
+  background: #c850c0;
+  background: -webkit-linear-gradient(45deg, #12278d, #967712);
+  background: -o-linear-gradient(45deg, #142992, #182c86);
+  background: -moz-linear-gradient(45deg, #1e2501, #c49d20);
+  background: linear-gradient(45deg, #2544cc, #c29a17);
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  align-items: center;
+  justify-content: initial;
+  flex-wrap: wrap;
+  padding: 5% 3%;
+  overflow: scroll;
+}
+
+.wrap-table100 {
+  max-width: 100%;
+  max-height: 80%;
+}
+
+table {
+  position: relative;
+  border-spacing: 1;
+  border-collapse: collapse;
+  background-color: rgba(49, 49, 49, 0.767);
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+  margin: 0 auto;
+}
+table * {
+  position: relative;
+}
+table td,
+table th {
+  padding-left: 8px;
+  padding-top: 5px;
+  padding-bottom: 3px;
+}
+
+table thead tr {
+  height: 30px;
+  background-color: rgba(18, 37, 90, 0.507);
+}
+table tbody tr {
+  height: 10%;
+}
+table tbody tr:last-child {
+  border: 0;
+}
+table td,
+table th {
+  text-align: left;
+}
+table td.l,
+table th.l {
+  text-align: right;
+}
+table td.c,
+table th.c {
+  text-align: center;
+}
+table td.r,
+table th.r {
+  text-align: center;
+}
+
+.table100-head th {
+  font-size: 12px;
+  color: #fff;
+  line-height: 1.2;
+  font-weight: unset;
+  height: 60px;
+  width: auto;
+  text-align: center;
+  /* text-align: b; */
+  /* height: auto; */
+  
+}
+
+
+tbody tr:nth-child(even) {
+  background-color: rgba(102, 102, 102, 0.596);
+}
+tbody tr:nth-child(even):hover {
+  background-color: rgb(45, 57, 82);
+}
+tbody tr:nth-child(odd) {
+  background-color: rgb(37, 41, 59);
+}
+tbody tr:nth-child(odd):hover {
+  background-color: rgb(45, 57, 82);
+}
+
+tbody tr {
+  font-size: 15px;
+  color: #ffffff;
+  line-height: 1.2;
+  font-weight: unset;
+}
+
+.columnShort {
+  width: 150px;
+  cursor: pointer;
+  
+}
+thead tr th.columnShort {
+  /* background-color: red; */
+  padding: 0px 10px;
+  position: relative;
+  transform: rotate(73deg);
+  /* background-color: aqua; */
+}
+thead tr th.columnShort:hover {
+  font-size: 14px;
+  color: rgb(147, 182, 228);
+  transform: rotate(0deg);
+  transition: 0.5s;
+}
+thead tr th.columnLarge {
+  transform: rotate(73deg);
+}
+.columnLarge {
+  width: 250px;
+}
+.datatable {
+  text-align: justify;
+}
+.datatableN {
+  text-align: center;
+}
+.scuderia {
+  min-width: 99px;
+  transform: rotate(73deg);
+}
+.griPoints{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.points{
+  grid-column-start: 1;
+  grid-column-end: 2;
+  /* grid-column: 1/3; */
+}
+.faults {
+  grid-column-start: 2;
+  grid-column-end: 3;
+  /* grid-column: 1/3; */
+  color: rgb(243, 70, 70);
+}

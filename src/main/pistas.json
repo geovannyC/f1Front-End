@@ -1,0 +1,86 @@
+{
+    "listaPistas": [
+        {
+            "pista": "Monza",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Estados Unidos",
+            "url": "./addons/estadosunidos.jpg"
+        },
+        {
+            "pista": "Baréin",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Spa Francochamps",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Imola",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Estoril",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Estíria",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Austria",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Abu Dabi",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Silverstone",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Brazíl",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "San Marino",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Brands Hatch",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Corea",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Rusia",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Melbourne",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Hungria Budapes",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Japón Susuka",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Alemania",
+            "url": "./addons/monza.jpg"
+        },
+        {
+            "pista": "Jerez",
+            "url": "./addons/monza.jpg"
+        }
+    ]
+}
+
+
