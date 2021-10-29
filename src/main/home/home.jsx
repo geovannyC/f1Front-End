@@ -10,6 +10,7 @@ import { ScuderiaRegister } from "../scuderia-register/scuderiaRegister";
 import { Championship } from "../championships/championships";
 import { LoadingF } from "../loading/loadingFetch";
 import { LoadingAwait } from "../loading/loadingAwait";
+import {  FaultFormat } from "../fault-register/faultRegister";
 import { getData, sendData } from "../../until/fetch";
 function useInterval(callback, delay) {
   const savedCallback = useRef();
@@ -89,6 +90,7 @@ export default function Home() {
   const childrenCH = useRef();
   const childRefLF = useRef();
   const childRefLA = useRef();
+  const childRefFF = useRef();
   const switchAction = (value, state) => {
     if (value === 0) {
       if (state === undefined) {
@@ -112,6 +114,8 @@ export default function Home() {
       childRefRD.current.callFnHandleRDOpen(folders);
     } else if (value === 5) {
       childrenSR.current.callFnHandleOpen(drivers, folders);
+    } else if (value === 7) {
+      childRefFF.current.callFnHandleOpen(driversCh, drivers);
     } else if (value === 6) {
       childrenCH.current.callFnHandleOpen(tracks, scuderias, championships);
     } else if (value === "loading" || value === "points") {
@@ -607,6 +611,7 @@ export default function Home() {
             callLoading={onLoadPage}
             callLoading2={prevData}
           />
+          <FaultFormat ref={childRefFF} callLoading={prevData}/>
           <ScuderiaRegister ref={childrenSR} callLoading={prevData} />
           <PodiumV2 ref={childrenP2} />
           <Table ref={childRefTB} />

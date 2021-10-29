@@ -59,6 +59,11 @@ export default function Menu(props) {
                 Registrar Puntuaciones
               </li>
             ) : null}
+            {props.step > 5 ? (
+              <li onClick={optionMenu} value={7} class="link">
+                Registrar Sanción
+              </li>
+            ) : null}
             <li onClick={optionMenu} value={3}>
               Registrar Pista
             </li>

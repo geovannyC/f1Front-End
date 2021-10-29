@@ -190,7 +190,7 @@
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 12px;
   width: 400px;
   justify-content: center;
   text-align: center;
@@ -742,6 +742,14 @@ button:hover {
 .secondary-color {
   color: rgb(187, 186, 186);
 }
+.dimentions-card-info-fault{
+  font-size: 35px;
+  display: flex;
+  flex-direction: column;
+}
+.dimentions-card-info-fault small {
+  margin: 3% 5%;
+}
 .driver-text {
   display: flex;
   align-items: center;
@@ -833,6 +841,10 @@ button:hover {
   border: 2px solid rgba(255, 254, 242, 0.651);
   color: #ffffff;
   transition: 200ms;
+}
+.input-autocomplete-error{
+  background-color: rgba(0, 0, 0, 0.541);
+  border: 2px solid rgba(182, 21, 21, 0.651);
 }
 .input-autocomplete:focus {
   border-radius: 0;
@@ -989,6 +1001,7 @@ button:hover {
   height: 100%;
   width: 100%;
 }
+
 .grid-two-columns-50{
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1490,6 +1503,15 @@ button:hover {
   /* width: 100%; */
   transform: scale(1.5);
   transition: 30s;
+}
+.correct-margins{
+  text-align: left;
+  margin: 3% 5%;
+  
+}
+.dimentions-card-info-fault{
+  height: 90%;
+  width: 80%;
 }
 @keyframes typewriter {
   to {

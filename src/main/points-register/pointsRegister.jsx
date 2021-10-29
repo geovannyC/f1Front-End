@@ -66,7 +66,6 @@ export const PointsRegister = forwardRef((props, ref) => {
       handleCloseRDType();
     } else {
       let newArr = await flsArr(scuderias);
-      console.log(newArr)
       inyectData(drivrs);
       setArrSelected(newArr);
       setCurrentTrack(currentTrackParam);

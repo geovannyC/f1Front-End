@@ -74,6 +74,7 @@ export const Table = forwardRef((props, ref) => {
       });
       switchAction(false);
     } else {
+      console.log(paramScuderiasCh)
       setTotalPointsdrivers(paramDriversCh);
       setDrivers(paramDriversVitaeCh);
       setAllDrivers(paramAllDrivers);
@@ -82,46 +83,90 @@ export const Table = forwardRef((props, ref) => {
       setOpen(true);
     }
   };
-  const sortChampionShip = ()=>{
-    let arrToSort = totalPointsdrivers.sort((a,b)=>{return b.puntos-a.puntos})
-    setTotalPointsdrivers(arrToSort)
-    forceUpdate()
+  const sortChampionShip = () => {
+    let arrToSort = totalPointsdrivers.sort((a, b) => {
+      const pointsA = parseInt(a.puntos);
+      const pointsB = parseInt(b.puntos);
+      const faultsA = parseInt(a.sanciones);
+      const faultsB = parseInt(b.sanciones);
+      const warningsA = parseInt(a.advertencias);
+      const warningsB = parseInt(b.advertencias);
+      let warningforCalcA = warningsA;
+      let warningforCalcB = warningsB;
+      let calcWarningsA =
+        warningforCalcA >= 3 ? parseInt((warningforCalcA /= 3)) * 5 : 0;
+      let calcWarningsB =
+        warningforCalcB >= 3 ? parseInt((warningforCalcB /= 3)) * 5 : 0;
+      let TotalA = pointsA - faultsA - calcWarningsA;
+      let TotalB = pointsB - faultsB - calcWarningsB;
+      return TotalB - TotalA;
+    });
+    setTotalPointsdrivers(arrToSort);
+    forceUpdate();
+  };
+  const totalPoints = (parampoints, paramfaults, paramwarnigs)=>{
+    const points = parseInt(parampoints?parampoints:0);
+    const faults = parseInt(paramfaults?paramfaults:0);
+    const warnings = parseInt(paramwarnigs?paramwarnigs:0);
+    let warningforCalc = warnings;
+    let calcWarnings =
+    warningforCalc >= 3 ? parseInt((warningforCalc /= 3)) * 5 : 0;
+    let Total = points - faults - calcWarnings;
+    return Total
   }
-  const sortChampionShipScuderias = ()=>{
-    let arrToSort = scuderias.sort((a,b)=>{return b.puntos-a.puntos})
-    setScuderias(arrToSort)
-    forceUpdate()
-  }
+  const sortChampionShipScuderias = () => {
+    let arrToSort = scuderias.sort((a, b) => {
+      let resultDriver1Scuderia1 = totalPointsdrivers.find((res) => {
+        return res.piloto._id === a.escuderia.piloto1;
+      });
+      let resultDriver2Scuderia1 = totalPointsdrivers.find((res) => {
+        return res.piloto._id === a.escuderia.piloto2;
+      });
+      let resultDriver1Scuderia2 = totalPointsdrivers.find((res) => {
+        return res.piloto._id === b.escuderia.piloto1;
+      });
+      let resultDriver2Scuderia2 = totalPointsdrivers.find((res) => {
+        return res.piloto._id === b.escuderia.piloto2;
+      });
+      const D1S1 = totalPoints(resultDriver1Scuderia1.puntos,resultDriver1Scuderia1.sanciones,resultDriver1Scuderia1.advertencias)
+      const D2S1 = totalPoints(resultDriver2Scuderia1.puntos,resultDriver2Scuderia1.sanciones,resultDriver2Scuderia1.advertencias)
+      const D1S2 = totalPoints(resultDriver1Scuderia2.puntos,resultDriver1Scuderia2.sanciones,resultDriver1Scuderia2.advertencias)
+      const D2S2 = totalPoints(resultDriver2Scuderia2.puntos,resultDriver2Scuderia2.sanciones,resultDriver2Scuderia2.advertencias)
+      const tScu1 = D1S1+D2S1
+      const tScu2 = D1S2+D2S2
+      return tScu2 - tScu1;
+    });
+    setScuderias(arrToSort);
+    forceUpdate();
+  };
   const forceUpdate = useForceUpdate();
   const handleChangeStateOpenC = () => {
-    if(openC){
-      setOpenC(false)
-      handleChangeCloseHoverTrack()
-      handleCloseTrackSelected()
-    }else{
-      setOpenC(true)
-      handleChangeCloseHoverTrack()
-      handleCloseTrackSelected()
+    if (openC) {
+      setOpenC(false);
+      handleChangeCloseHoverTrack();
+      handleCloseTrackSelected();
+    } else {
+      setOpenC(true);
+      handleChangeCloseHoverTrack();
+      handleCloseTrackSelected();
     }
     forceUpdate();
   };
-  const setDataWallBackground =async (result) => {
-    let thereAreDriver = !result.pista.piloto
-      ? false
-      : result.pista.piloto;
+  const setDataWallBackground = async (result) => {
+    let thereAreDriver = !result.pista.piloto ? false : result.pista.piloto;
     let driver = thereAreDriver
       ? allDrivers.find((result) => {
           return result._id === thereAreDriver;
         })
       : false;
-    let findWall= false
-    if(driver){
-      let url = `/getImagesPilots/${driver.carpetaPiloto}`
-      await getData(url).then((response)=>{
-        if(response){
-          findWall=response
+    let findWall = false;
+    if (driver) {
+      let url = `/getImagesPilots/${driver.carpetaPiloto}`;
+      await getData(url).then((response) => {
+        if (response) {
+          findWall = response;
         }
-      })
+      });
     }
     if (
       !onMouseHoverTrack.openWatchTB &&
@@ -134,7 +179,7 @@ export const Table = forwardRef((props, ref) => {
         wallpaper: result.pista.image,
         fastLap: result.pista.vuelta,
         wallDriver: findWall,
-        driver: driver?driver:false,
+        driver: driver ? driver : false,
       });
     }
   };
@@ -173,23 +218,21 @@ export const Table = forwardRef((props, ref) => {
       });
     }
   };
-  const selectTrack = async(result) => {
-    let thereAreDriver = !result.pista.piloto
-    ? false
-    : result.pista.piloto;
-  let driver = thereAreDriver
-    ? allDrivers.find((result) => {
-        return result._id === thereAreDriver;
-      })
-    : false;
-    let findWall= false
-    if(driver){
-      let url = `/getImagesPilots/${driver.carpetaPiloto}`
-      await getData(url).then((response)=>{
-        if(response){
-          findWall=response
+  const selectTrack = async (result) => {
+    let thereAreDriver = !result.pista.piloto ? false : result.pista.piloto;
+    let driver = thereAreDriver
+      ? allDrivers.find((result) => {
+          return result._id === thereAreDriver;
+        })
+      : false;
+    let findWall = false;
+    if (driver) {
+      let url = `/getImagesPilots/${driver.carpetaPiloto}`;
+      await getData(url).then((response) => {
+        if (response) {
+          findWall = response;
         }
-      })
+      });
     }
     if (onMouseHoverTrack.openWatchTB && !onMouseHoverTrack.openTrackSelected) {
       setOnMouseHoverTrack({
@@ -199,15 +242,15 @@ export const Table = forwardRef((props, ref) => {
         wallpaper: result.pista.image,
         fastLap: result.pista.vuelta,
         wallDriver: findWall,
-        driver: driver?driver:false,
+        driver: driver ? driver : false,
       });
     }
   };
 
   const DataTrackSelected = () => {
     let lap = onMouseHoverTrack.fastLap;
-    let driver = onMouseHoverTrack.driver
-    let wall = onMouseHoverTrack.wallDriver
+    let driver = onMouseHoverTrack.driver;
+    let wall = onMouseHoverTrack.wallDriver;
     return (
       <div
         className={
@@ -223,12 +266,11 @@ export const Table = forwardRef((props, ref) => {
           </div>
           <div className="data-track-column2 grid-data-driver-fl">
             <div className="aling-content-driver-fl">
-              
               <div
                 className="card-driver-fl"
                 onClick={() => switchAction(driver)}
               >
-                <img src={wall}className="img-driver-fl" alt="" />
+                <img src={wall} className="img-driver-fl" alt="" />
               </div>
             </div>
             <div>
@@ -306,16 +348,6 @@ export const Table = forwardRef((props, ref) => {
       resolve(result);
     });
   };
-  const findDriverCh = async (arr, idDriver) => {
-    return new Promise((resolve) => {
-      const result = arr.find((element) => element.piloto._id === idDriver);
-      resolve(result);
-    });
-  };
-  const pointsDriver = async (track) => {
-    let result = await findTrackCh(drivers, track);
-    return result;
-  };
   const Points = (props) => {
     const result = drivers.filter(
       (element) => element.pistaCampeonato._id === props.track
@@ -343,7 +375,18 @@ export const Table = forwardRef((props, ref) => {
         <>
           <td>{result.piloto.nombre}</td>
           <td>{result.piloto.victorias ? result.piloto.victorias : 0}</td>
-          <td>{result.puntos ? result.puntos : 0}</td>
+          <PointsFaults tfaults={result.sanciones} />
+          <PointsWarnings twarnings={result.advertencias} />
+          <TPointsFaults
+            tfaults={result.sanciones ? result.sanciones : 0}
+            twarnings={result.advertencias ? result.advertencias : 0}
+          />
+          <PointsChampionship
+            tpoints={result.puntos ? result.puntos : 0}
+            tfaults={result.sanciones ? result.sanciones : 0}
+            twarnings={result.advertencias ? result.advertencias : 0}
+          />
+          {/* <td>{result.puntos ? result.puntos : 0}</td> */}
         </>
       );
     } else {
@@ -351,9 +394,15 @@ export const Table = forwardRef((props, ref) => {
     }
   };
   const PointsChampionship = (props) => {
+    const points = parseInt(props.tpoints);
+    const faults = parseInt(props.tfaults);
+    const warnings = parseInt(props.twarnings);
+    let warningforCalc = warnings;
+    let calcWarnings =
+      warningforCalc >= 3 ? parseInt((warningforCalc /= 3)) * 5 : 0;
     if (open) {
       if (props.tpoints) {
-        return <td>{props.tpoints}</td>;
+        return <td>{points - faults - calcWarnings}</td>;
       } else {
         return <td>-</td>;
       }
@@ -361,6 +410,77 @@ export const Table = forwardRef((props, ref) => {
       return null;
     }
   };
+  const PointsFaults = (props) => {
+    const faults = props.tfaults;
+    if (open) {
+      if (faults) {
+        return <td style={{ color: "red" }}>{faults}</td>;
+      } else {
+        return <td>-</td>;
+      }
+    } else {
+      return null;
+    }
+  };
+  const PointsWarnings = (props) => {
+    const warnings = parseInt(props.twarnings);
+    if (open) {
+      if (warnings) {
+        return <td style={{ color: "red" }}>{warnings}</td>;
+      } else {
+        return <td>-</td>;
+      }
+    } else {
+      return null;
+    }
+  };
+  const TPointsFaults = (props) => {
+    const faults = parseInt(props.tfaults);
+    const warnings = parseInt(props.twarnings);
+    let warningforCalc = warnings;
+    let calcWarnings =
+      warningforCalc >= 3 ? parseInt((warningforCalc /= 3)) * 5 : 0;
+    if (open) {
+      if (calcWarnings || faults) {
+        return <td style={{ color: "red" }}>{calcWarnings + faults}</td>;
+      } else {
+        return <td>-</td>;
+      }
+    } else {
+      return null;
+    }
+  };
+  const TConstructorsChampionship = (props)=>{
+    let result1 = totalPointsdrivers.find((res) => {
+      return res.piloto._id === props.idDriver1;
+    });
+    let result2 = totalPointsdrivers.find((res) => {
+      return res.piloto._id === props.idDriver2;
+    });
+    const pointsA = parseInt(result1.puntos?result1.puntos:0);
+    const pointsB = parseInt(result2.puntos?result2.puntos:0);
+    const faultsA = parseInt(result1.sanciones?result1.sanciones:0);
+    const faultsB = parseInt(result2.sanciones?result2.sanciones:0);
+    const warningsA = parseInt(result1.advertencias?result1.advertencias:0);
+    const warningsB = parseInt(result2.advertencias?result2.advertencias:0);
+    let warningforCalcA = warningsA;
+    let warningforCalcB = warningsB;
+    let calcWarningsA =
+      warningforCalcA >= 3 ? parseInt((warningforCalcA /= 3)) * 5 : 0;
+    let calcWarningsB =
+      warningforCalcB >= 3 ? parseInt((warningforCalcB /= 3)) * 5 : 0;
+    let TotalA = pointsA - faultsA - calcWarningsA;
+    let TotalB = pointsB - faultsB - calcWarningsB;
+    if (openC) {
+      if (TotalA || TotalB) {
+        return <td >{TotalA + TotalB}</td>;
+      } else {
+        return <td>-</td>;
+      }
+    } else {
+      return null;
+    }
+  }
   const ChampionShipTable = () => {
     return (
       <div
@@ -393,6 +513,9 @@ export const Table = forwardRef((props, ref) => {
                       })
                     : null}
 
+                  <th>Sanc</th>
+                  <th>Adve</th>
+                  <th>T.San.PTS</th>
                   <th onClick={sortChampionShip}>Campeonato</th>
                 </tr>
               </thead>
@@ -424,7 +547,22 @@ export const Table = forwardRef((props, ref) => {
                                 );
                               })
                             : null}
-                          <PointsChampionship tpoints={result.puntos} />
+
+                          <PointsFaults tfaults={result.sanciones} />
+                          <PointsWarnings twarnings={result.advertencias} />
+                          <TPointsFaults
+                            tfaults={result.sanciones ? result.sanciones : 0}
+                            twarnings={
+                              result.advertencias ? result.advertencias : 0
+                            }
+                          />
+                          <PointsChampionship
+                            tpoints={result.puntos ? result.puntos : 0}
+                            tfaults={result.sanciones ? result.sanciones : 0}
+                            twarnings={
+                              result.advertencias ? result.advertencias : 0
+                            }
+                          />
                           {/* {points[totalPointsdrivers.indexOf(result)]
                             ? points[totalPointsdrivers.indexOf(result)].map((points) => {
                                 return (
@@ -467,9 +605,15 @@ export const Table = forwardRef((props, ref) => {
                 <th>Escuderia</th>
                 <th>Piloto 1</th>
                 <th>Victorias</th>
+                <th>San</th>
+                <th>Adv</th>
+                <th>T</th>
                 <th>Puntos P1</th>
                 <th>Piloto 2</th>
                 <th>Victorias</th>
+                <th>San</th>
+                <th>Adv</th>
+                <th>T</th>
                 <th>Puntos P2</th>
                 <th>Total Victorias</th>
                 <th>Dobletes</th>
@@ -491,16 +635,14 @@ export const Table = forwardRef((props, ref) => {
                           idDriver={result.escuderia.piloto2}
                         />
                         <td>
-                          {result.escuderia.victorias
-                            ? result.victorias
-                            : 0}
+                          {result.escuderia.victorias ? result.victorias : 0}
                         </td>
-                        <td>
-                          {result.escuderia.doblete
-                            ? result.doblete
-                            : 0}
-                        </td>
-                        <td>{result.puntos}</td>
+                        <td>{result.escuderia.doblete ? result.doblete : 0}</td>
+                        <TConstructorsChampionship
+                        idDriver1={result.escuderia.piloto1}
+                        idDriver2={result.escuderia.piloto2}
+                        />
+                        {/* <td>{result.puntos}</td> */}
                       </tr>
                     );
                   })
