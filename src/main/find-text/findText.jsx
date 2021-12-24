@@ -15,7 +15,7 @@ const filterItems = (needle, heystack) => {
       });
     }
   };
-  const handleChangeValueInput = async (text, arr) => {
+export const handleChangeValueInput = async (text, arr) => {
     
     if(text){
       let textFormat = await formatWords(text);
@@ -27,6 +27,3 @@ const filterItems = (needle, heystack) => {
       return false
     }
   };
-module.exports= {
-    handleChangeValueInput
-}
