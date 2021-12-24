@@ -118,7 +118,6 @@ export const Login = () => {
                 <input
                   className="input-autocomplete"
                   {...register("onda", { required: true, maxLength: 20 })}
-                  value=""
                 />
                 {errors.onda && (
                   <small className="color-white">Éste es requerido</small>
