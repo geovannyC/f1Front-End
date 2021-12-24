@@ -5,10 +5,6 @@ import React, {
   useImperativeHandle,
 } from "react";
 import useForceUpdate from "use-force-update";
-import monza from "../images/monza.jpg";
-import BrandsHatch from "../images/Brands Hatch .png";
-import austin from "../images/austin.jpeg";
-import alonso from "../images/alonso.jpg";
 import { DataDriver } from "../data-driver/dataDriver";
 import { getData } from "../../until/fetch";
 export const Table = forwardRef((props, ref) => {
@@ -340,14 +336,6 @@ export const Table = forwardRef((props, ref) => {
   const scrollUp = () => {
     startPosition.current.scrollIntoView({ behavior: "smooth" });
   };
-  const findTrackCh = async (arr, idTrack) => {
-    return new Promise((resolve) => {
-      const result = arr.filter(
-        (element) => element.pistaCampeonato._id === idTrack
-      );
-      resolve(result);
-    });
-  };
   const Points = (props) => {
     const result = drivers.filter(
       (element) => element.pistaCampeonato._id === props.track
@@ -583,13 +571,6 @@ export const Table = forwardRef((props, ref) => {
             <div class="arrow-down" onMouseOver={scrollDown}></div>
           </div>
         </div>
-
-        {/* <a type="button" onClick={() => scrollDown()}>
-            TEST SCROLL Down
-          </a>
-        <a type="button" onClick={() => scrollUp()}>
-            TEST SCROLL Up
-          </a> */}
       </div>
     );
   };
@@ -657,9 +638,9 @@ export const Table = forwardRef((props, ref) => {
     return (
       <div className="table-campionship">
         <div className="container-flex">
-          <a type="button" onClick={handleChangeStateOpenC}>
+          <button type="button" onClick={handleChangeStateOpenC}>
             {openC ? "Mundial Pilotos" : "Mundial Constructores"}
-          </a>
+          </button>
         </div>
       </div>
     );
@@ -672,12 +653,10 @@ export const Table = forwardRef((props, ref) => {
           : "general-container animation-right-to-left"
       }
     >
-      {/* {PreviousChampionShip()} */}
       {ChampionShipTable()}
       {CchampionshipTable()}
       {BtnTbleChamp()}
       {WallBackground()}
-      {/* {switchOpenDataDriver()} */}
       {<DataDriver ref={childRef} />}
     </div>
   );

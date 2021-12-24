@@ -8,10 +8,14 @@ import { RegisterTrack } from "../register-track/registerTrack";
 import { PointsRegister } from "../points-register/pointsRegister";
 import { ScuderiaRegister } from "../scuderia-register/scuderiaRegister";
 import { Championship } from "../championships/championships";
+import { Loading } from "../loading/loading";
 import { LoadingF } from "../loading/loadingFetch";
 import { LoadingAwait } from "../loading/loadingAwait";
-import {  FaultFormat } from "../fault-register/faultRegister";
+import { FaultFormat } from "../fault-register/faultRegister";
+import { ScuderiaEditor } from "../scuderia-editor/scuderiaEditor";
 import { getData, sendData } from "../../until/fetch";
+import { Login } from "../login/login";
+import { OndaWordRegister } from "../ondaWordRegister/ondaWordRegister";
 function useInterval(callback, delay) {
   const savedCallback = useRef();
   useEffect(() => {
@@ -45,6 +49,7 @@ function useInterval2(callback, delay) {
 export default function Home() {
   const [wallBackground, setWallBackground] = useState(false),
     [step, setStep] = useState(false),
+    [isLoged, setIsLoged] = useState(false),
     [loading, setLoading] = useState(true),
     [dataToFetch, setDataToFetch] = useState(false),
     [currentWallpaper, setCurrentWallpaper] = useState(false),
@@ -55,7 +60,6 @@ export default function Home() {
     [driversCh, setDriversCh] = useState(false),
     [tracksCh, setTracksCh] = useState(false),
     [driversVitaeCh, setDriversVitaeCh] = useState(false),
-    [currentCh, setCurrentCh] = useState(false),
     [currentTrack, setCurrentTrack] = useState(false),
     [intervalRPoints, setIntervalRPoints] = useState(false),
     [scuderiasCh, setScuderiasCh] = useState(false),
@@ -63,8 +67,9 @@ export default function Home() {
     [count, setCount] = useState(0),
     [folders, setFolders] = useState(false);
   useEffect(() => {
-    onLoadPage();
-  }, [!wallBackground]);
+    loginStatus();
+    // eslint-disable-next-line
+  }, []);
   useInterval(
     () => {
       sendDataPointsDriver(count);
@@ -91,8 +96,31 @@ export default function Home() {
   const childRefLF = useRef();
   const childRefLA = useRef();
   const childRefFF = useRef();
+  const childRefLL = useRef();
+  const childRefSE = useRef();
+  const childRefOW = useRef();
+  const loginStatus = () => {
+    const url = "/get-autorization";
+    const idUsr = localStorage.getItem("id");
+    const token = localStorage.getItem("token");
+    if (idUsr && token) {
+      getData(url).then((response) => {
+        console.log(response)
+        if (response) {
+          setIsLoged(true);
+          onLoadPage();
+        } else {
+          setIsLoged(false);
+        }
+      });
+    } else {
+      setIsLoged(false);
+    }
+  };
   const switchAction = (value, state) => {
-    if (value === 0) {
+    if (value === -1) {
+      childRefOW.current.callFnHandleOpen();
+    } else if (value === 0) {
       if (state === undefined) {
         childrenP2.current.callFnHandleOpen(tracksCh, driversVitaeCh);
       } else {
@@ -116,6 +144,8 @@ export default function Home() {
       childrenSR.current.callFnHandleOpen(drivers, folders);
     } else if (value === 7) {
       childRefFF.current.callFnHandleOpen(driversCh, drivers);
+    } else if (value === 8) {
+      childRefSE.current.callFnHandleOpen(scuderias, drivers, folders);
     } else if (value === 6) {
       childrenCH.current.callFnHandleOpen(tracks, scuderias, championships);
     } else if (value === "loading" || value === "points") {
@@ -202,7 +232,6 @@ export default function Home() {
     let urlCh = "/update-track-championship";
     let urlDriver = "/update-driver";
     let urlUpdateScuderia = "/update-scuderia";
-    let urlUpdateScuderiaChampionship = "/update-scuderia-championship";
     let urlUpdateChampionshipScuderia = "/update-championship-scuderia";
     let urlUpdateChampionshipDriver = "/update-championship-driver";
     let urlCreateChampionshipScuderia = "/create-championship-scuderia";
@@ -308,7 +337,7 @@ export default function Home() {
                 (response) => {
                   let driverPosition1 = ruleteD[0].escuderia.escuderia;
                   let driverPosition2 = ruleteD[1].escuderia.escuderia;
-                  let dob = driverPosition2._id === driverPosition2._id;
+                  let dob = driverPosition1._id === driverPosition2._id;
                   let arr = driverPosition1.doblete;
                   let victories = driverPosition1.victorias
                     ? driverPosition1.victorias
@@ -433,7 +462,6 @@ export default function Home() {
         }
       );
     } else if (dataToFetch.type === "postPoints") {
-      // let sndDataPoints = await sendDataPointsDriver()
       setTimeout(() => {
         switchAction("points", "Cagando");
         setIntervalRPoints(true);
@@ -441,8 +469,8 @@ export default function Home() {
     }
   };
   const onLoadPage = async () => {
-    if (loading) {
-      childRefLA.current.callFnHandleOpen("loading");
+    if (loading ) {
+      childRefLL.current.callFnHandleOpen("loading");
       await handleSetWallBackground();
       await choseRndImage().then((responsewall) => {
         setCurrentWallpaper(responsewall);
@@ -471,7 +499,6 @@ export default function Home() {
                               await findPlayingCh(response4).then(
                                 async (findCrrCh) => {
                                   if (findCrrCh) {
-                                    setCurrentCh(findCrrCh);
                                     await getData(
                                       `/find-track-championship/${findCrrCh._id}`
                                     ).then(async (tracksCham) => {
@@ -506,11 +533,11 @@ export default function Home() {
                                                       );
                                                       setStep(6);
                                                       setLoading(false);
-                                                      childRefLA.current.callFnHandleClose();
+                                                      childRefLL.current.callFnHandleClose();
                                                     } else {
                                                       setStep(10);
                                                       setLoading(false);
-                                                      childRefLA.current.callFnHandleClose();
+                                                      childRefLL.current.callFnHandleClose();
                                                     }
                                                     setDriversVitaeCh(
                                                       response7
@@ -518,68 +545,68 @@ export default function Home() {
                                                   } else {
                                                     setStep(5);
                                                     setLoading(false);
-                                                    childRefLA.current.callFnHandleClose();
+                                                    childRefLL.current.callFnHandleClose();
                                                   }
                                                 });
                                               } else {
                                                 setStep(5);
                                                 setLoading(false);
-                                                childRefLA.current.callFnHandleClose();
+                                                childRefLL.current.callFnHandleClose();
                                               }
                                             });
                                           } else {
                                             setStep(4);
                                             setLoading(false);
-                                            childRefLA.current.callFnHandleClose();
+                                            childRefLL.current.callFnHandleClose();
                                           }
                                         });
                                       } else {
                                         setStep(4);
                                         setLoading(false);
-                                        childRefLA.current.callFnHandleClose();
+                                        childRefLL.current.callFnHandleClose();
                                       }
                                     });
                                   } else {
                                     setStep(4);
                                     setLoading(false);
-                                    childRefLA.current.callFnHandleClose();
+                                    childRefLL.current.callFnHandleClose();
                                   }
                                 }
                               );
                             } else {
                               setStep(4);
                               setLoading(false);
-                              childRefLA.current.callFnHandleClose();
+                              childRefLL.current.callFnHandleClose();
                             }
                           }
                         );
                       } else {
                         setStep(3);
                         setLoading(false);
-                        childRefLA.current.callFnHandleClose();
+                        childRefLL.current.callFnHandleClose();
                       }
                     } else {
                       setStep(3);
                       setLoading(false);
-                      childRefLA.current.callFnHandleClose();
+                      childRefLL.current.callFnHandleClose();
                     }
                   });
                 } else {
                   setStep(2);
                   setLoading(false);
-                  childRefLA.current.callFnHandleClose();
+                  childRefLL.current.callFnHandleClose();
                 }
               } else {
                 setStep(2);
                 setLoading(false);
-                childRefLA.current.callFnHandleClose();
+                childRefLL.current.callFnHandleClose();
               }
             });
           }
         } else {
           setStep(1);
           setLoading(false);
-          childRefLA.current.callFnHandleClose();
+          childRefLL.current.callFnHandleClose();
         }
       });
       if (!currentWallpaper) {
@@ -589,39 +616,51 @@ export default function Home() {
     }
   };
   const SchemmaSwitchComponents = () => {
-    if (loading) {
-      return <LoadingAwait ref={childRefLA}/>;
+    return (
+      <div className="containerHome">
+        {CapWall()}
+        <img alt="" src={currentWallpaper} className="image-wall" />
+        <Menu optionMenu={optionMenu} step={step} />
+        {/* <FLap/> */}
+        {/* <div className="temcontainer"> */}
+        {/* <Rdrivers/> */}
+        {/* <AutoComplete/> */}
+        {/* </div> */}
+        {/* <DataDriver ref={childRefDD}/> */}
+        {/* <CardsPodium ref={childrenP2} /> */}
+        <LoadingF ref={childRefLF} callFetch={() => goData()} />
+        <Loading ref={childRefLL} />
+        <Championship
+          ref={childrenCH}
+          callLoading={onLoadPage}
+          callLoading2={prevData}
+        />
+        <ScuderiaEditor ref={childRefSE} />
+        <FaultFormat ref={childRefFF} callLoading={prevData} />
+        <ScuderiaRegister ref={childrenSR} callLoading={prevData} />
+        <PodiumV2 ref={childrenP2} />
+        <Table ref={childRefTB} />
+        <PointsRegister ref={childRefPR} callLoading={prevData} />
+        <RegisterTrack ref={childRefRT} callLoading={prevData} />
+        <DriverRegister ref={childRefRD} callLoading={prevData} />
+        <LoadingAwait ref={childRefLA} />
+        <OndaWordRegister ref={childRefOW} callLoading={prevData} />
+      </div>
+    );
+  };
+  const SchemmaLogin = () => {
+    return (
+      <div className="containerHome">
+        <Login />
+      </div>
+    );
+  };
+  const SwicthLoginHome = () => {
+    if (isLoged) {
+      return SchemmaSwitchComponents();
     } else {
-      return (
-        <div className="containerHome">
-          {CapWall()}
-          <img src={currentWallpaper} className="image-wall" />
-          <Menu optionMenu={optionMenu} step={step} />
-          {/* <FLap/> */}
-          {/* <div className="temcontainer"> */}
-          {/* <Rdrivers/> */}
-          {/* <AutoComplete/> */}
-          {/* </div> */}
-          {/* <DataDriver ref={childRefDD}/> */}
-          {/* <CardsPodium ref={childrenP2} /> */}
-          <LoadingF ref={childRefLF} callFetch={() => goData()} />
-          {/* <Loading/> */}
-          <Championship
-            ref={childrenCH}
-            callLoading={onLoadPage}
-            callLoading2={prevData}
-          />
-          <FaultFormat ref={childRefFF} callLoading={prevData}/>
-          <ScuderiaRegister ref={childrenSR} callLoading={prevData} />
-          <PodiumV2 ref={childrenP2} />
-          <Table ref={childRefTB} />
-          <PointsRegister ref={childRefPR} callLoading={prevData} />
-          <RegisterTrack ref={childRefRT} callLoading={prevData} />
-          <DriverRegister ref={childRefRD} callLoading={prevData} />
-          <LoadingAwait ref={childRefLA}/>
-        </div>
-      );
+      return SchemmaLogin();
     }
   };
-  return SchemmaSwitchComponents();
+  return SwicthLoginHome();
 }

@@ -118,6 +118,7 @@ export const DataDriver = forwardRef((props, ref) => {
               }
             ></div>
             <img
+              alt=""
               src={image}
               className={
                 // secondImage
@@ -156,9 +157,7 @@ export const DataDriver = forwardRef((props, ref) => {
     );
   };
   if (!loading) {
-    return (
-      <div className="container-data-driver ">{CardDataDriver()}</div>
-    );
+    return <div className="container-data-driver ">{CardDataDriver()}</div>;
   } else {
     return null;
   }

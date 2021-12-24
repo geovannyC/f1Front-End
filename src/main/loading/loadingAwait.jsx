@@ -1,5 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useState } from "react";
-
+import Loading from "../../main/images/loading.png";
 export const LoadingAwait = forwardRef((props, ref) => {
   const [data, setData] = useState({
     open: false,
@@ -28,7 +28,7 @@ export const LoadingAwait = forwardRef((props, ref) => {
   const schemmaLoading = () => {
     if (data.open) {
       if (data.type === "loading") {
-        return <div className="general-container-2 test">Cargando...</div>;
+        return <div className="general-container-2">{Loading}</div>;
       } else if (data.type === "error") {
         return <div className="general-container-2 test">ERROR</div>;
       } else {

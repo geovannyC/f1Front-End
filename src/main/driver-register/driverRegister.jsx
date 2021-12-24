@@ -1,9 +1,8 @@
 import React, { useState, forwardRef, useImperativeHandle } from "react";
 import useForceUpdate from "use-force-update";
-import alonso from "../images/alonso.jpg";
-import caralonso from "../images/caralonso.jpg";
 import { handleChangeValueInput } from "../find-text/findText";
 import { getData } from "../../until/fetch";
+import Loading from "../../main/images/loading.png";
 export const DriverRegister = forwardRef((props, ref) => {
   const [open, setOpen] = useState(false),
     [data, setData] = useState(false),
@@ -49,7 +48,7 @@ export const DriverRegister = forwardRef((props, ref) => {
       carpetaPiloto: dataInput.folderDriver,
       carpetaCoche: dataInput.f1CarFolder,
       victorias: 0,
-      vueltasRapidas: 0
+      vueltasRapidas: 0,
     };
     const url = "/create-driver";
     props.callLoading(formatData, url, "post");
@@ -64,14 +63,19 @@ export const DriverRegister = forwardRef((props, ref) => {
     } else if (event.target.id === "alias") {
       prevData.alias = txt;
     } else if (event.target.id === "fd") {
-      handleChangeValueInput(txt, data).then(async(driverFinded) => {
+      handleChangeValueInput(txt, data).then(async (driverFinded) => {
         if (driverFinded) {
           if (driverFinded.length === 2 || driverFinded.length === 1) {
-            console.log(driverFinded[0])
-            if (!images.cardProfile || driverFinded[0] !== dataInput.folderDriver) {
+            if (
+              !images.cardProfile ||
+              driverFinded[0] !== dataInput.folderDriver
+            ) {
+              newImages.cardProfile = Loading;
+              forceUpdate();
               await findImage(driverFinded[0]).then((result) => {
                 if (result) {
-                  newImages.cardProfile= result;
+                  newImages.cardProfile = result;
+                  forceUpdate();
                 }
               });
             }
@@ -80,13 +84,16 @@ export const DriverRegister = forwardRef((props, ref) => {
         }
       });
     } else if (event.target.id === "cf") {
-      handleChangeValueInput(txt, data).then(async(carFinded) => {
+      handleChangeValueInput(txt, data).then(async (carFinded) => {
         if (carFinded) {
           if (carFinded.length === 1 || carFinded.length === 2) {
             if (!images.cardImage || carFinded[0] !== dataInput.f1CarFolder) {
+              newImages.cardImage = Loading
+              forceUpdate();
               await findImage(carFinded[0]).then((result) => {
                 if (result) {
-                  newImages.cardImage= result;
+                  newImages.cardImage = result;
+                  forceUpdate();
                 }
               });
             }
@@ -96,16 +103,22 @@ export const DriverRegister = forwardRef((props, ref) => {
       });
     }
     setDataInput(prevData);
-    setImages(newImages)
+    setImages(newImages);
     forceUpdate();
   };
-  const checkInputs = ()=>{
-    if(dataInput.name && dataInput.folderDriver && dataInput.f1CarFolder && (dataInput.name!==dataInput.alias) &&( dataInput.f1CarFolder!==dataInput.folderDriver)){
-      return true
-    }else{
-      return false
+  const checkInputs = () => {
+    if (
+      dataInput.name &&
+      dataInput.folderDriver &&
+      dataInput.f1CarFolder &&
+      dataInput.name !== dataInput.alias &&
+      dataInput.f1CarFolder !== dataInput.folderDriver
+    ) {
+      return true;
+    } else {
+      return false;
     }
-  }
+  };
   return (
     <div
       className={
@@ -148,10 +161,10 @@ export const DriverRegister = forwardRef((props, ref) => {
             id="cf"
             onChange={handleChangeInput}
           />
-          {checkInputs()? (
-            <a type="Button" className="input-autocomplete" onClick={postData}>
+          {checkInputs() ? (
+            <button type="Button" className="input-autocomplete" onClick={postData}>
               Crear Piloto
-            </a>
+            </button>
           ) : null}
         </div>
         <div
@@ -165,6 +178,7 @@ export const DriverRegister = forwardRef((props, ref) => {
             <div className="general-card ordinary-shadow">
               <div className="text-hover-card-driver gray-dark-transparent-color index-0"></div>
               <img
+              alt=""
                 src={images.cardImage}
                 className="img-card-driver-fl img-driver-fl index--1"
               />
@@ -182,7 +196,11 @@ export const DriverRegister = forwardRef((props, ref) => {
                 <div className="container-r-drivers index-2">
                   <div className="card-image-driver">
                     <div className="general-card">
-                      <img src={images.cardProfile} className="img-card-driver-fl" />
+                      <img
+                      alt=""
+                        src={images.cardProfile}
+                        className="img-card-driver-fl"
+                      />
                     </div>
                   </div>
                 </div>

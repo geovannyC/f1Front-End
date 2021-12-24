@@ -1,20 +1,17 @@
 import React, {
   useState,
-  useEffect,
   useImperativeHandle,
   forwardRef,
 } from "react";
 import { handleReduceSearch } from "../motor-search/motorSearch";
 export const AutoComplete = forwardRef((props, ref) => {
   const [handleChangeInput, setHandleChangeInput] = useState(""),
-    [driversSeleted, setDriversSelectet] = useState(false),
     [loading, setLoading] = useState(true),
     [data, setData] = useState({
       name: false,
       alias: false,
       drivers: false,
     }),
-    [barLoading, setBarLoading] = useState(false),
     [dataFinded, setDataFinded] = useState(false);
   useImperativeHandle(ref, () => ({
     callFnHandleOpen(nameR, aliasR, driversR) {
@@ -35,6 +32,7 @@ export const AutoComplete = forwardRef((props, ref) => {
     if (dataFinded) {
       if (event.charCode === 13) {
         props.driverSelected(dataFinded);
+        setHandleChangeInput("")
       }
     }
   };
@@ -85,17 +83,6 @@ export const AutoComplete = forwardRef((props, ref) => {
                   addProgress(e);
                 }}
               />
-              <div
-                class={
-                  barLoading
-                    ? barLoading === "100%"
-                      ? "meter color-complete"
-                      : "meter color"
-                    : null
-                }
-              >
-                <span style={{ width: barLoading ? barLoading : "0%" }}></span>
-              </div>
             </div>
           </div>
         </div>

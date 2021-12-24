@@ -18,6 +18,7 @@ export const handleReduceSearch = async (txt, data, dataAlias, drivers) => {
     return new Promise(async (resolve) => {
       let result;
       await handleChangeValueInput(txt, data).then(async (driverFinded) => {
+        
           if (driverFinded && driverFinded.length > 0) {
               if (driverFinded.length === 1 && driverFinded !== "false") {
                   

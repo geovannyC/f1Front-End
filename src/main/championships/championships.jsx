@@ -2,7 +2,6 @@ import React, {
   useState,
   forwardRef,
   useImperativeHandle,
-  useEffect,
 } from "react";
 import useForceUpdate from "use-force-update";
 import { sendData } from "../../until/fetch";
@@ -63,15 +62,7 @@ export const Championship = forwardRef((props, ref) => {
         arr.push(event);
       }
     }
-    console.log(arr);
     setTracksSelected(arr);
-    // if (!arr[event] && arr[event] !== 0) {
-    //   arr[event] = event;
-    // } else {
-    //   arr[event] = false;
-    // }
-    // setTracksSelected(arr);
-    // console.log(arr);
     forceUpdate();
   };
   const fnScuderiaSelected = (event) => {
@@ -95,18 +86,6 @@ export const Championship = forwardRef((props, ref) => {
     // setTracksSelected(arr);
     // console.log(arr);
     forceUpdate();
-  };
-  const constructorArrs = (arr, arrI) => {
-    return new Promise((resolve) => {
-      let newArr = [];
-      arrI.forEach((element) => {
-        if (element || element === 0) {
-          newArr.push(arr[element]);
-        }
-      });
-      resolve(newArr);
-      return newArr;
-    });
   };
   const shuffle = (array) => {
     const mix = array.sort(() => Math.random() - 0.5);
@@ -247,29 +226,29 @@ export const Championship = forwardRef((props, ref) => {
                 onChange={handleChangeName}
               />
               {tracksSelected.length > 1 && openFormNC ? (
-                <a
+                <button
                   type="Button"
                   className="input-autocomplete"
                   onClick={shuffleTracks}
                 >
                   Mezclar Pistas
-                </a>
+                </button>
               ) : null}
-              <a
+              <button
                 type="Button"
                 className="input-autocomplete"
                 onClick={openFormNC ? buildShemma : handleOpenFormNC}
               >
                 Crear nuevo Campeonato
-              </a>
+              </button>
               {openFormNC ? (
-                <a
+                <button
                   type="Button"
                   className="input-autocomplete"
                   onClick={handleOpenFormNC}
                 >
                   Cancelar
-                </a>
+                </button>
               ) : null}
             </div>
             {openFormNC ? (

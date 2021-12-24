@@ -6,6 +6,7 @@ export const getData=async(url)=>{
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
+            'Autorizations': localStorage.getItem('token'),
         }   
     }); 
     
@@ -27,6 +28,7 @@ export const getData=async(url)=>{
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
+            'Autorizations': localStorage.getItem('token'),
         }   
     });
     

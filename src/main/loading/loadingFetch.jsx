@@ -1,9 +1,7 @@
 import React, {
   useState,
-  useEffect,
   useImperativeHandle,
   forwardRef,
-  useRef,
 } from "react";
 export const LoadingF = forwardRef((props, ref) => {
   const [open, setOpen] = useState(false),
@@ -60,22 +58,22 @@ export const LoadingF = forwardRef((props, ref) => {
         >
           {text}
         </small>
-        <a
+        <button
           onClick={handleOpenLoading}
           className={
             loading ? "input-autocomplete line-cross2" : "input-autocomplete"
           }
         >
           Aceptar
-        </a>
-        <a
+        </button>
+        <button
           onClick={handleClose}
           className={
             loading ? "input-autocomplete line-cross2" : "input-autocomplete"
           }
         >
           Cancelar
-        </a>
+        </button>
       </div>
     );
   };

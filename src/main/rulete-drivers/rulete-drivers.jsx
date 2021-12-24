@@ -4,16 +4,13 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import alonso from "../images/alonso.jpg";
 import { DataDriver } from "../data-driver/dataDriver";
-import { getData } from "../../until/fetch";
 export const Rdrivers = forwardRef((props, ref) => {
-  const [numberCancel, setNumberCancel] = useState(false),
-    [data, setData] = useState({
-      open: false,
-      type: false,
-      value: false,
-    });
+  const [data, setData] = useState({
+    open: false,
+    type: false,
+    value: false,
+  });
   const childRef = useRef();
   useImperativeHandle(ref, () => ({
     callFnCloseDataDriver() {
@@ -26,17 +23,6 @@ export const Rdrivers = forwardRef((props, ref) => {
       handleClose();
     },
   }));
-  const findImage =async (value) => {
-
-      let image;
-      const url = `/getImagesPilots/${value}`;
-      await getData(url).then((response) => {
-        if (response) {
-          image = response;
-        }
-      });
-      return image
-  };
   const switchAction = (value) => {
     if (value) {
       childRef.current.callFnHandleOpenDialog(value, "ordinary-shadow");
@@ -44,9 +30,9 @@ export const Rdrivers = forwardRef((props, ref) => {
       childRef.current.callFnHandleForceClose();
     }
   };
-  const openDD = (value, color)=>{
-    props.openData(value, color)
-  }
+  const openDD = (value, color) => {
+    props.openData(value, color);
+  };
   const handleOpen = (dat, type) => {
     setData({
       open: true,
@@ -60,17 +46,6 @@ export const Rdrivers = forwardRef((props, ref) => {
       type: false,
       value: false,
     });
-  };
-  const handleChangeNumberCancel = (value) => {
-    if (!numberCancel) {
-      console.log(value);
-      setNumberCancel(value);
-    }
-  };
-  const handleCloseNumberCancel = () => {
-    if (numberCancel) {
-      setNumberCancel(false);
-    }
   };
   const colorShadowPosition = (result) => {
     if ((result && data.type === "register") || result === 0) {
@@ -119,27 +94,15 @@ export const Rdrivers = forwardRef((props, ref) => {
               }
               onClick={() => deletePositionD(result)}
             >
-              <div
-                className={
-                  numberCancel === result
-                    ? "line-cross-1 open-line-cross-1"
-                    : "line-cross-1"
-                }
-              ></div>
-              <div
-                className={
-                  numberCancel === result
-                    ? "line-cross-1 open-line-cross-2"
-                    : "line-cross-1"
-                }
-              ></div>
+              <div className="line-cross-1 open-line-cross-1"></div>
+              <div className="line-cross-1 open-line-cross-2"></div>
             </div>
           ) : null}
 
           <div className={colorShadowPosition(result)}>
             <div
               onClick={
-                checkTO(result, "object") ? () => openDD(result.driver): null
+                checkTO(result, "object") ? () => openDD(result.driver) : null
               }
               className="text-hover-card-driver"
             >
@@ -154,7 +117,11 @@ export const Rdrivers = forwardRef((props, ref) => {
               ) : null}
             </div>
             {checkTO(result, "object") ? (
-              <img src={result.imageDriver} className="img-card-driver-fl" />
+              <img
+                src={result.imageDriver}
+                className="img-card-driver-fl"
+                alt=""
+              />
             ) : null}
           </div>
         </div>
@@ -164,8 +131,6 @@ export const Rdrivers = forwardRef((props, ref) => {
     }
   };
   const SchemmaReview = (result) => {
-  
-    
     if (result) {
       return (
         <div className="grid-two-rows">
@@ -178,20 +143,8 @@ export const Rdrivers = forwardRef((props, ref) => {
               }
               onClick={() => deletePositionD(result)}
             >
-              <div
-                className={
-                  numberCancel === result
-                    ? "line-cross-1 open-line-cross-1"
-                    : "line-cross-1"
-                }
-              ></div>
-              <div
-                className={
-                  numberCancel === result
-                    ? "line-cross-1 open-line-cross-2"
-                    : "line-cross-1"
-                }
-              ></div>
+              <div className="line-cross-1 open-line-cross-1"></div>
+              <div className="line-cross-1 open-line-cross-2"></div>
             </div>
           ) : null}
 
@@ -213,7 +166,7 @@ export const Rdrivers = forwardRef((props, ref) => {
               ) : null}
             </div>
             {checkTO(result, "object") ? (
-              <img src={false} className="img-card-driver-fl" />
+              <img src={false} className="img-card-driver-fl" alt="" />
             ) : null}
           </div>
         </div>
@@ -225,7 +178,7 @@ export const Rdrivers = forwardRef((props, ref) => {
   const ChoseFormat = () => {
     if (data.value) {
       if (data.type === "review") {
-        return FormatRuleteReview()
+        return FormatRuleteReview();
       } else {
         return FormatRuleteRegister();
       }
@@ -249,19 +202,24 @@ export const Rdrivers = forwardRef((props, ref) => {
       return <h1>Loading</h1>;
     }
   };
+  const ContentSchemmaReview = (data) => {
+    if (data.value.length === 1) {
+      return SchemmaReview(data.value[0]);
+    } else {
+      return data.value.map((result) => {
+        return SchemmaReview(result);
+      });
+    }
+  };
   const FormatRuleteReview = () => {
     if (data.value) {
       return (
         <>
-        <div className="container-r-drivers">
-          <div className="grid-r-drivers">
-            {data.value.length === 1
-              ? SchemmaReview(data.value[0])
-              : data.value.map((result) => {
-                  return SchemmaReview(result);
-                })}
+          <div className="container-r-drivers">
+            <div className="grid-r-drivers grid-r-drivers-review">
+              {ContentSchemmaReview(data)}
+            </div>
           </div>
-        </div>
           <DataDriver ref={childRef} />
         </>
       );

@@ -5,7 +5,6 @@ import {
   useImperativeHandle,
   useRef,
 } from "react";
-import alonso from "../images/alonso.jpg";
 import { CardsPodium } from "./cardsPodium";
 import { getData } from "../../until/fetch";
 import { LoadingAwait } from "../loading/loadingAwait";
@@ -73,7 +72,7 @@ export const PodiumV2 = forwardRef((props, ref) => {
     });
   };
   const getWinners = async (arr) => {
-    let images = new Object();
+    let images = {};
     let filterWinners = arr.filter((result) => {
       return result.puntos > 24;
     });

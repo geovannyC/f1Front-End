@@ -1,5 +1,4 @@
 import React, { useState, forwardRef, useImperativeHandle } from "react";
-import { sendData } from "../../until/fetch";
 export const RegisterTrack = forwardRef((props, ref) => {
   const [open, setOpen] = useState(false),
     [information, setInformation] = useState({
@@ -99,9 +98,9 @@ export const RegisterTrack = forwardRef((props, ref) => {
             className="input-autocomplete"
           />
           {information.pais && information.pais && image ? (
-            <a type="Button" className="input-autocomplete" onClick={postData}>
+            <button type="Button" className="input-autocomplete" onClick={postData}>
               Crear Pista
-            </a>
+            </button>
           ) : null}
         </div>
         <div
@@ -113,7 +112,7 @@ export const RegisterTrack = forwardRef((props, ref) => {
         >
           <div className="card-track-previwew-image">
             <div className="general-card ordinary-shadow">
-              <img src={image} className="img-card-driver-fl" />
+              <img src={image} alt="" className="img-card-driver-fl" />
             </div>
           </div>
         </div>

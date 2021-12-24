@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 export default function Menu(props) {
-  const [open, setOpen] = useState(false),
+  const [open, setOpen] = useState(true),
     [loading, setLoading] = useState(true),
     [currentOption, setCurrentOption] = useState(false);
   useEffect(() => {
     setLoading(false);
-  }, !loading);
+  }, [loading]);
 
   const handleChangeMenuOpen = () => {
     if (open) {
@@ -68,18 +68,28 @@ export default function Menu(props) {
               Registrar Pista
             </li>
             {props.step > 1 ? (
-              <li onClick={optionMenu} value={4} href="" class="link">
+              <li onClick={optionMenu} value={4}  class="link">
                 Registrar Piloto
               </li>
             ) : null}
             {props.step > 2 ? (
-              <li onClick={optionMenu} value={5} href="" class="link">
+              <li onClick={optionMenu} value={5}  class="link">
                 Registrar Scuderia
               </li>
             ) : null}
             {props.step > 3 ? (
-              <li onClick={optionMenu} value={6} href="" class="link">
+              <li onClick={optionMenu} value={8}  class="link">
+                Editar Scuderia
+              </li>
+            ) : null}
+            {props.step > 3 ? (
+              <li onClick={optionMenu} value={6}  class="link">
                 Campeonatos
+              </li>
+            ) : null}
+            {props.step > 1 ? (
+              <li onClick={optionMenu} value={-1}  class="link">
+                Registrar Palabras Ondas
               </li>
             ) : null}
           </ul>

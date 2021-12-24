@@ -5,7 +5,6 @@ import React, {
   useRef,
   useEffect,
 } from "react";
-import alonso from "../images/alonso.jpg";
 import VanillaTilt from "vanilla-tilt";
 import { Rdrivers } from "../rulete-drivers/rulete-drivers";
 import { getData } from "../../until/fetch";
@@ -46,6 +45,8 @@ export const CardsPodium = forwardRef((props, ref) => {
     [images, setImages] = useState(false),
     [openRdrivers, setOpenRdrivers] = useState(false);
   const options = {
+    easing: "cubic-bezier(.03,.98,.52,.99)",
+    perspective: 500,
     reverse: true,
     scale: 1.2,
     speed: 1200,
@@ -87,11 +88,6 @@ export const CardsPodium = forwardRef((props, ref) => {
       });
     }, 4000);
   };
-  const handleForceClose = () => {
-    setOpen(false);
-    setOpenRdrivers(false);
-    handleChangecloseRdrivers();
-  };
   const handleChangeOpenRdrivers = (value, type) => {
     setOpenRdrivers(true);
     handleOpenRD(value, type);
@@ -107,7 +103,9 @@ export const CardsPodium = forwardRef((props, ref) => {
     let lstDrivers = [];
     await drivers.map((driver) => {
       if (drivers.indexOf(driver) > 2) {
-        lstDrivers.push(driver);
+        return lstDrivers.push(driver);
+      }else{
+        return false
       }
     });
     await getWinners(drivers).then((response) => {
@@ -117,6 +115,8 @@ export const CardsPodium = forwardRef((props, ref) => {
         setTimeout(() => {
           setOpen(true);
         }, 200);
+      } else {
+        return false;
       }
     });
     if (lstDrivers.length > 0) {
@@ -124,7 +124,7 @@ export const CardsPodium = forwardRef((props, ref) => {
     }
   };
   const getWinners = async (arr) => {
-    let images = new Object();
+    let images = {};
     await arr.map(async (result) => {
       let url = `/getImagesPilots/${result.piloto.carpetaPiloto}`;
       await getData(url).then((response) => {
@@ -158,7 +158,7 @@ export const CardsPodium = forwardRef((props, ref) => {
       return (
         <div
           className={
-            open ? "general-container index-2" : "general-container index-0"
+            open ? "general-container index-2 " : "general-container index-0"
           }
         >
           <div className="grid-three-rows-60-5-35">
@@ -174,7 +174,7 @@ export const CardsPodium = forwardRef((props, ref) => {
                   <div className="column2-schemma ">
                     <div
                       onClick={() =>
-                        switchAction(drivers[1].piloto, "gray-shadow")
+                        switchAction(drivers[1].piloto, "gray-shadow ")
                       }
                       className="general-card card2-podium "
                     >
@@ -193,6 +193,7 @@ export const CardsPodium = forwardRef((props, ref) => {
                         <LoadingAwait ref={childRefLA} />
                       ) : (
                         <img
+                          alt=""
                           src={images[1] ? images[1].image : false}
                           className="img-driver-fl"
                         />
@@ -223,6 +224,7 @@ export const CardsPodium = forwardRef((props, ref) => {
                         <LoadingAwait ref={childRefLA} />
                       ) : (
                         <img
+                          alt=""
                           src={images[0] ? images[0].image : false}
                           className="img-driver-fl"
                         />
@@ -253,6 +255,7 @@ export const CardsPodium = forwardRef((props, ref) => {
                         <LoadingAwait ref={childRefLA} />
                       ) : (
                         <img
+                          alt=""
                           src={images[2] ? images[2].image : false}
                           className="img-driver-fl"
                         />
@@ -264,7 +267,7 @@ export const CardsPodium = forwardRef((props, ref) => {
             </div>
             {open ? (
               <div className="column2-schemma index-3">
-                <a
+                <button
                   onClick={
                     openRdrivers
                       ? () => handleChangecloseRdrivers()
@@ -273,7 +276,7 @@ export const CardsPodium = forwardRef((props, ref) => {
                   className="input-autocomplete "
                 >
                   {openRdrivers ? "Cerrar Ruleta de Pilotos" : "#4-#10"}
-                </a>
+                </button>
               </div>
             ) : null}
 
@@ -284,8 +287,7 @@ export const CardsPodium = forwardRef((props, ref) => {
                   : "column2-schemma animation-left-to-right"
               }
             >
-              <div className="general-container">
-                {/* <h1>Hi</h1> */}
+              <div className="container-r-drivers">
                 <Rdrivers ref={childRefDR} openData={switchAction} />
               </div>
             </div>

@@ -12,11 +12,6 @@ export const FaultFormat = forwardRef((props, ref) => {
   const [open, setOpen] = useState(false),
     [dDriverSelected, setDDriverSelected] = useState(false),
     [dataDriver, setDataDriver] = useState(false),
-    [drivers, setDrivers] = useState(false),
-    [shemmafaults, setShemmafaults] = useState({
-      faults: false,
-      warnings: false,
-    }),
     [dataInput, setDataInput] = useState({
       fault: 0,
       warning: 0,
@@ -37,11 +32,9 @@ export const FaultFormat = forwardRef((props, ref) => {
       if (paramdrivrs) {
         inyectData(paramdrivrs);
       }
-      setDrivers(paramdrivrs);
       setDriversCh(driversVitaeCh);
       setOpen(true);
     } else {
-      setDrivers(false);
       setOpen(false);
     }
   };
@@ -50,7 +43,7 @@ export const FaultFormat = forwardRef((props, ref) => {
     return new Promise((resolve) => {
       let find = arr.map((element) => {
         if (element.nombre === undefined) {
-          return;
+          return false;
         } else {
           return element.nombre;
         }
@@ -62,7 +55,7 @@ export const FaultFormat = forwardRef((props, ref) => {
     return new Promise((resolve) => {
       let find = arr.map((element) => {
         if (element.alias === undefined) {
-          return;
+          return false;
         } else {
           return element.alias;
         }
@@ -75,6 +68,8 @@ export const FaultFormat = forwardRef((props, ref) => {
       const result = arr.find((element) => {
         if (typeof element == "object") {
           return element.piloto._id === driver._id;
+        }else{
+          return false
         }
       });
       resolve(result);
@@ -194,9 +189,9 @@ export const FaultFormat = forwardRef((props, ref) => {
             onChange={handleChangeDataInput}
           />
           {verifyEmptyForm() ? (
-            <a type="button" className="button" onClick={sendData}>
+            <button type="button" className="button" onClick={sendData}>
               Crear
-            </a>
+            </button>
           ) : null}
         </>
       );

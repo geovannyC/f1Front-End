@@ -16,9 +16,12 @@ const filterItems = (needle, heystack) => {
     }
   };
   const handleChangeValueInput = async (text, arr) => {
+    
     if(text){
       let textFormat = await formatWords(text);
-      let searchPilot = await filterItems(textFormat, arr);
+      let searchPilot = await filterItems(textFormat, arr).then((response)=>{
+        return response
+      })
       return searchPilot
     }else{
       return false

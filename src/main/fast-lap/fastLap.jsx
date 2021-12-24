@@ -1,8 +1,6 @@
 import React, { useState, forwardRef, useImperativeHandle } from "react";
 import useForceUpdate from "use-force-update";
-import { handleChangeValueInput } from "../find-text/findText";
 import { handleReduceSearch } from "../motor-search/motorSearch";
-import { pilotos } from "../record.json";
 export const FastLap = forwardRef((props, ref) => {
   const [open, setOpen] = useState(false),
     [data, setData] = useState(false),
@@ -12,13 +10,7 @@ export const FastLap = forwardRef((props, ref) => {
       seconds: false,
       miliseconds: false,
     }),
-    [loading, setLoading] = useState(true),
-    [dataInput, setDataInput] = useState({
-      name: false,
-      alias: false,
-      drivers: false,
-    }),
-    [dataFinded, setDataFinded] = useState(false);
+    [loading, setLoading] = useState(true);
   useImperativeHandle(ref, () => ({
     callFnHandleOpen(nameR, aliasR, driversR) {
       handleOpen(nameR, aliasR, driversR);
@@ -133,9 +125,9 @@ export const FastLap = forwardRef((props, ref) => {
               handleChangeInput.minute &&
               handleChangeInput.driver ? (
                 <div className="container-r-drivers">
-                  <a className="input-autocomplete" onClick={() => sendData()}>
+                  <button className="input-autocomplete" onClick={() => sendData()}>
                     Registrar Vuelta Rápida
-                  </a>
+                  </button>
                 </div>
               ) : null}
             </div>

@@ -1,12 +1,17 @@
 import React, { useState, forwardRef, useImperativeHandle } from "react";
 import useForceUpdate from "use-force-update";
 import { handleChangeValueInput } from "../find-text/findText";
-import alonso from "../images/alonso.jpg";
-import alonso2 from "../images/alonso2.jpg";
+import { ChromePicker } from "react-color";
 import { getData } from "../../until/fetch";
 export const ScuderiaRegister = forwardRef((props, ref) => {
   const [open, setOpen] = useState(false),
     [data, setData] = useState(false),
+    [color, setColor] = useState({
+      openPP: false,
+      openSP: false,
+      primaryColor: "#fff",
+      secondaryColor: "#0000",
+    }),
     [dataAlias, setDataAlias] = useState(false),
     [drivers, setDrivers] = useState(false),
     [folders, setFolders] = useState(false),
@@ -42,7 +47,7 @@ export const ScuderiaRegister = forwardRef((props, ref) => {
     return new Promise((resolve) => {
       let find = arr.map((element) => {
         if (element.nombre === undefined) {
-          return;
+          return false;
         } else {
           return element.nombre;
         }
@@ -54,7 +59,7 @@ export const ScuderiaRegister = forwardRef((props, ref) => {
     return new Promise((resolve) => {
       let find = arr.map((element) => {
         if (element.alias === undefined) {
-          return;
+          return false;
         } else {
           return element.alias;
         }
@@ -222,6 +227,81 @@ export const ScuderiaRegister = forwardRef((props, ref) => {
     setImages(newImages);
     forceUpdate();
   };
+  const handleChanguePColor = (paramcolor) => {
+    let stateColor = color;
+    stateColor.primaryColor = paramcolor.hex;
+    setPColorStyle(paramcolor.hex);
+    setColor(stateColor);
+    forceUpdate();
+  };
+  const handleChangueSColor = (paramcolor) => {
+    let stateColor = color;
+    stateColor.secondaryColor = paramcolor.hex;
+    console.log(paramcolor);
+    setSColorStyle(paramcolor.hex);
+    setColor(stateColor);
+    forceUpdate();
+  };
+  const setPColorStyle = (newColor) => {
+    document.documentElement.style.setProperty(
+      "--primary-bg-color-scuderia",
+      newColor
+    );
+  };
+  const setSColorStyle = (newColor) => {
+    document.documentElement.style.setProperty(
+      "--secondary-bg-color-scuderia",
+      newColor
+    );
+  };
+  const PrimaryColorPicker = () => {
+    if (color.openPP && !color.openSP) {
+      return (
+        <div className="container-color-picker">
+          <ChromePicker
+            color={color.primaryColor}
+            onChangeComplete={handleChanguePColor}
+          />
+        </div>
+      );
+    } else {
+      return null;
+    }
+  };
+  const SecondaryColorPicker = () => {
+    if (color.openSP && !color.openPP) {
+      return (
+        <div className="container-color-picker">
+          <ChromePicker
+            color={color.secondaryColor}
+            onChangeComplete={handleChangueSColor}
+          />
+        </div>
+      );
+    } else {
+      return null;
+    }
+  };
+  const handleOpenColorPicker = (event) => {
+    let stateColor = color;
+    let id = event.target.id;
+    console.log(id);
+    if (id === "primary") {
+      if (color.openPP) {
+        stateColor.openPP = false;
+      } else {
+        stateColor.openPP = true;
+      }
+    } else {
+      if (color.openSP) {
+        stateColor.openSP = false;
+      } else {
+        stateColor.openSP = true;
+      }
+    }
+    setColor(stateColor);
+    forceUpdate();
+  };
   const ContainerSR = () => {
     return (
       <div
@@ -233,8 +313,8 @@ export const ScuderiaRegister = forwardRef((props, ref) => {
           <div
             className={
               open
-                ? "column1-schemma  animation-up-to-down-open"
-                : "column1-schemma  animation-up-to-down"
+                ? "column1-schemma animation-up-to-down-open"
+                : "column1-schemma animation-up-to-down"
             }
           >
             <div className="aling-items-column text-card-scuderia">
@@ -246,34 +326,12 @@ export const ScuderiaRegister = forwardRef((props, ref) => {
                 onChange={handleChangeInput}
               />
             </div>
-            <div
-              className={
-                images.driver1
-                  ? "container-r-drivers animation-up-to-down-open"
-                  : "container-r-drivers animation-up-to-down"
-              }
-            >
-              <div className="column1-schemma">
-                <img
-                  className={
-                    images.driver1
-                      ? "img-container-driver-scuderia scaleImage"
-                      : "img-container-driver-scuderia"
-                  }
-                  src={images.driver1}
-                  alt=""
-                />
-              </div>
-              <small className="text-podium text-image-driver-scuderia">
-                {dataInput.driver1.nombre}
-              </small>
-            </div>
           </div>
           <div
             className={
               open
                 ? "column1-schemma  animation-down-to-up-open"
-                : "column1-schemma   animation-down-to-up"
+                : "column1-schemma  animation-down-to-up"
             }
           >
             <div className="aling-items-column text-card-scuderia">
@@ -292,28 +350,44 @@ export const ScuderiaRegister = forwardRef((props, ref) => {
                 id="fScuderia"
                 onChange={handleChangeInput}
               />
+              {color.openSP || color.openPP ? null : (
+                <>
+                  <button
+                    className="input-autocomplete"
+                    onClick={handleOpenColorPicker}
+                    id="primary"
+                  >
+                    Seleccionar color primario
+                  </button>
+                  <button
+                    className="input-autocomplete"
+                    onClick={handleOpenColorPicker}
+                    id="secondary"
+                  >
+                    Seleccionar color secondario
+                  </button>
+                </>
+              )}
+
+              {PrimaryColorPicker()}
+              {SecondaryColorPicker()}
+              {color.openPP || color.openSP ? (
+                <button
+                  className="input-autocomplete"
+                  onClick={handleOpenColorPicker}
+                  id={color.openSP ? "secondary" : "primary"}
+                >
+                  aceptar
+                </button>
+              ) : null}
               {dataInput.name &&
               dataInput.fScuderia &&
               dataInput.driver1 &&
               dataInput.driver2 ? (
-                <a className="input-autocomplete" onClick={postData}>
+                <button className="input-autocomplete" onClick={postData}>
                   Crear Scuderia
-                </a>
+                </button>
               ) : null}
-            </div>
-            <div
-              className={
-                images.scuderia
-                  ? "container-r-drivers animation-down-to-up-open"
-                  : "container-r-drivers animation-down-to-up"
-              }
-            >
-              <div className="column1-schemma">
-                <img
-                  className="img-container-driver-scuderia"
-                  src={images.scuderia}
-                />
-              </div>
             </div>
           </div>
           <div
@@ -338,18 +412,92 @@ export const ScuderiaRegister = forwardRef((props, ref) => {
                   ? "container-r-drivers animation-down-to-up-open"
                   : "container-r-drivers animation-down-to-up"
               }
+            ></div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  const ContainerImagesSR = () => {
+    return (
+      <div
+        className={
+          open ? "general-container index-1" : "general-container index-0"
+        }
+      >
+        <div className="grid-three-columns-1fr-15-1fr">
+          <div
+            className={
+              open
+                ? "column1-schemma animation-up-to-down-open"
+                : "column1-schemma animation-up-to-down"
+            }
+          >
+            <div
+              className={
+                images.driver1
+                  ? "container-r-drivers animation-up-to-down-open"
+                  : "container-r-drivers animation-up-to-down"
+              }
             >
-              <div className="column1-schemma">
-                <img
-                  className={
-                    images.driver2
-                      ? "img-container-driver-scuderia scaleImage"
-                      : "img-container-driver-scuderia"
-                  }
-                  src={images.driver2}
-                  alt=""
-                />
-              </div>
+              <img
+                className={
+                  images.driver1
+                    ? "img-container-driver-scuderia scaleImage"
+                    : "img-container-driver-scuderia"
+                }
+                src={images.driver1}
+                alt=""
+              />
+              <small className="text-podium text-image-driver-scuderia">
+                {dataInput.driver1.nombre}
+              </small>
+            </div>
+          </div>
+          <div
+            className={
+              open
+                ? "column1-schemma  animation-down-to-up-open"
+                : "column1-schemma  animation-down-to-up"
+            }
+          >
+            <div
+              className={
+                images.scuderia
+                  ? "container-r-drivers animation-down-to-up-open"
+                  : "container-r-drivers animation-down-to-up"
+              }
+            >
+              <img
+                className="img-container-driver-scuderia"
+                src={images.scuderia}
+                alt=""
+              />
+            </div>
+          </div>
+          <div
+            className={
+              open
+                ? "column1-schemma  index-1 animation-down-to-up-open"
+                : "column1-schemma  index-1 animation-down-to-up"
+            }
+          >
+            <div
+              className={
+                images.driver2
+                  ? "container-r-drivers animation-down-to-up-open"
+                  : "container-r-drivers animation-down-to-up"
+              }
+            >
+              <img
+                className={
+                  images.driver2
+                    ? "img-container-driver-scuderia scaleImage"
+                    : "img-container-driver-scuderia"
+                }
+                src={images.driver2}
+                alt=""
+              />
               <small className="text-podium text-image-driver-scuderia">
                 {dataInput.driver2.nombre}
               </small>
@@ -359,5 +507,10 @@ export const ScuderiaRegister = forwardRef((props, ref) => {
       </div>
     );
   };
-  return ContainerSR();
+  return (
+    <>
+      {ContainerImagesSR()}
+      {ContainerSR()}
+    </>
+  );
 });

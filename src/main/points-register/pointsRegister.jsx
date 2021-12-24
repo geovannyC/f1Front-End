@@ -3,17 +3,15 @@ import { useState } from "react/cjs/react.development";
 import { Rdrivers } from "../rulete-drivers/rulete-drivers";
 import { AutoComplete } from "../auto-complete/autoComplete";
 import { FastLap } from "../fast-lap/fastLap";
-import { getData, sendData } from "../../until/fetch";
+import { getData } from "../../until/fetch";
+import Loading from "../../main/images/loading.png";
 import { DataDriver } from "../data-driver/dataDriver";
 const puntos = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
 export const PointsRegister = forwardRef((props, ref) => {
   const [open, setOpen] = useState(false),
-    [drivers, setDrivers] = useState(false),
     [currentTrack, setCurrentTrack] = useState(false),
     [scuderiasCh, setScuderiasCh] = useState(false),
     [arrSelected, setArrSelected] = useState([]),
-    [data, setData] = useState(false),
-    [dataAlias, setDataAlias] = useState(false),
     [isReady, setIsReady] = useState(false),
     [fLap, setFlap] = useState(false);
 
@@ -41,9 +39,8 @@ export const PointsRegister = forwardRef((props, ref) => {
     childRefDR.current.callFnCloseRuleteType();
   };
   const flsArr = (arr) => {
-    console.log(arr)
     return new Promise((resolve) => {
-      let width = (arr.length * 2)>10?10:arr.length * 2
+      let width = arr.length * 2 > 10 ? 10 : arr.length * 2;
       let nextArr = [];
       for (let index = 0; index < width; index++) {
         nextArr.push(index);
@@ -53,11 +50,7 @@ export const PointsRegister = forwardRef((props, ref) => {
   };
   const childRef = useRef();
   const switchAction = (value, color) => {
-
-      childRef.current.callFnHandleOpenDialog(value, color);
-
-
-    
+    childRef.current.callFnHandleOpenDialog(value, color);
   };
   const handleOpen = async (scuderias, drivrs, currentTrackParam) => {
     if (open) {
@@ -71,7 +64,6 @@ export const PointsRegister = forwardRef((props, ref) => {
       setCurrentTrack(currentTrackParam);
       setOpen(true);
       setScuderiasCh(scuderias);
-      setDrivers(drivrs);
       handleOpenRD(newArr, "register");
     }
   };
@@ -79,7 +71,7 @@ export const PointsRegister = forwardRef((props, ref) => {
     return new Promise((resolve) => {
       let find = arr.map((element) => {
         if (element.nombre === undefined) {
-          return;
+          return false;
         } else {
           return element.nombre;
         }
@@ -91,7 +83,7 @@ export const PointsRegister = forwardRef((props, ref) => {
     return new Promise((resolve) => {
       let find = arr.map((element) => {
         if (element.alias === undefined) {
-          return;
+          return false;
         } else {
           return element.alias;
         }
@@ -104,8 +96,6 @@ export const PointsRegister = forwardRef((props, ref) => {
     let arr2 = await arrFilterAlias(x);
     handleOpenAU(arr, arr2, x);
     handleOpenFL(arr, arr2, x);
-    setData(arr);
-    setDataAlias(arr2);
   };
   const findImage = (value) => {
     return new Promise(async (resolve) => {
@@ -114,6 +104,8 @@ export const PointsRegister = forwardRef((props, ref) => {
       await getData(url).then((response) => {
         if (response) {
           image = response;
+        } else {
+          image = Loading;
         }
       });
       resolve(image);
@@ -124,21 +116,23 @@ export const PointsRegister = forwardRef((props, ref) => {
       const result = arr.find((element) => {
         if (typeof element == "object") {
           return element.driver._id === id;
+        } else {
+          return false;
         }
       });
       resolve(result);
     });
   };
   const findFalseDriver = async (arr) => {
-    console.log(arr)
+    console.log(arr);
     return new Promise((resolve) => {
       const result = arr.every((element) => {
         if (typeof element == "number") {
-          console.log('element')
+          console.log("element");
           return false;
-        }else{
-          console.log('no element')
-          return true
+        } else {
+          console.log("no element");
+          return true;
         }
       });
       resolve(result);
@@ -152,7 +146,7 @@ export const PointsRegister = forwardRef((props, ref) => {
   };
   const findEmptyBox = async (event) => {
     let flsBox = await findFalseDriver(arrSelected).then((result) => {
-      if (!result || !fLap && !event) {
+      if ((!result || !fLap) && !event) {
         return false;
       } else {
         return true;
@@ -160,23 +154,22 @@ export const PointsRegister = forwardRef((props, ref) => {
     });
     return flsBox;
   };
-  const sendDataToPost = ()=>{
+  const sendDataToPost = () => {
     let formatData = {
       dataRulete: arrSelected,
       dataFasLap: fLap,
-      
-    }
+    };
     let url = {
       urlDriverVitae: "/create-driver-vitae-championship",
       urlFlapDriver: "/create-fas-lap-driver-championship",
       urlUpdateTrack: "/update-track",
-    }
-    props.callLoading(formatData, url, "postPoints")
-  }
+    };
+    props.callLoading(formatData, url, "postPoints");
+  };
   let addPoints = async (value) => {
     let driver = value.driver;
     let newArr = arrSelected;
-    let recordTrack = !currentTrack?false:currentTrack.pista.vuelta;
+    let recordTrack = !currentTrack ? false : currentTrack.pista.vuelta;
     let prevFind = await findByIdDriver(driver._id, newArr);
     let newFormatLap = fLap
       ? fLap
@@ -212,7 +205,7 @@ export const PointsRegister = forwardRef((props, ref) => {
     newFormatLap.championship = currentTrack.championship;
     newFormatLap.track = currentTrack.pista;
     newFormatLap.driver = driver;
-    newFormatLap.minute =  parseInt(value.minute) ;
+    newFormatLap.minute = parseInt(value.minute);
     newFormatLap.seconds = parseInt(value.seconds);
     newFormatLap.miliseconds = parseInt(value.miliseconds);
     if (recordTrack.length === 0) {
@@ -237,25 +230,27 @@ export const PointsRegister = forwardRef((props, ref) => {
       let currentRecordTrack = calcMinute + calcSeconds + miliseconds;
       let newRTrack =
         calcMinuteCurrent + calcSecondsCurrent + milisecondsCurrent;
-      if(newFormatLap)
-      if (currentRecordTrack > newRTrack && currentRecordTrack !== newRTrack) {
-        recordTrack = [
-          newFormatLap.minute,
-          newFormatLap.seconds,
-          newFormatLap.miliseconds,
-        ];
-        let schemmaNewDriverFasLap = {
-          idTrack: currentTrack.pista._id,
-          driverFl: driver._id,
-          newFasLap: recordTrack,
-        };
-        newFormatLap.isRecord = schemmaNewDriverFasLap;
-        
-      } else {
-        newFormatLap.isRecord = false;
-      }
+      if (newFormatLap)
+        if (
+          currentRecordTrack > newRTrack &&
+          currentRecordTrack !== newRTrack
+        ) {
+          recordTrack = [
+            newFormatLap.minute,
+            newFormatLap.seconds,
+            newFormatLap.miliseconds,
+          ];
+          let schemmaNewDriverFasLap = {
+            idTrack: currentTrack.pista._id,
+            driverFl: driver._id,
+            newFasLap: recordTrack,
+          };
+          newFormatLap.isRecord = schemmaNewDriverFasLap;
+        } else {
+          newFormatLap.isRecord = false;
+        }
     }
-    let fnEmpty = await findEmptyBox(true)
+    let fnEmpty = await findEmptyBox(true);
     if (fnEmpty) {
       setIsReady(true);
     } else {
@@ -270,6 +265,8 @@ export const PointsRegister = forwardRef((props, ref) => {
       const result = arr.find((element) => {
         if (typeof element == "object") {
           return element.escuderia.piloto1 === driver._id;
+        }else{
+          return false
         }
       });
       resolve(result);
@@ -280,6 +277,8 @@ export const PointsRegister = forwardRef((props, ref) => {
       const result = arr.find((element) => {
         if (typeof element == "object") {
           return element.escuderia.piloto2 === driver._id;
+        }else{
+          return false
         }
       });
       resolve(result);
@@ -303,7 +302,7 @@ export const PointsRegister = forwardRef((props, ref) => {
                 puntos: puntos[result],
                 imageDriver: imageDriver,
                 driver: res,
-                escuderia: findDriver2
+                escuderia: findDriver2,
               };
               newArr[result] = dat;
               setArrSelected(newArr);
@@ -322,7 +321,7 @@ export const PointsRegister = forwardRef((props, ref) => {
               puntos: puntos[result],
               imageDriver: imageDriver,
               driver: res,
-              escuderia: findDriver1
+              escuderia: findDriver1,
             };
             newArr[result] = dat;
             setArrSelected(newArr);
@@ -333,8 +332,8 @@ export const PointsRegister = forwardRef((props, ref) => {
           }
         });
       }
-      let fnEmpty = await findEmptyBox()
-      console.log(fnEmpty)
+      let fnEmpty = await findEmptyBox();
+      console.log(fnEmpty);
       if (fnEmpty) {
         setIsReady(true);
       } else {
@@ -344,16 +343,16 @@ export const PointsRegister = forwardRef((props, ref) => {
       alert("piloto ya seleccionado");
     }
   };
-  const HandleCloseIsReady = ()=>{
-    setIsReady(false)
-  }
+  const HandleCloseIsReady = () => {
+    setIsReady(false);
+  };
   return (
     <div
       className={
         open ? "general-container index-2" : "general-container index-0"
       }
     >
-        {<DataDriver ref={childRef} />}
+      {<DataDriver ref={childRef} />}
       <div
         className={
           isReady
@@ -361,8 +360,12 @@ export const PointsRegister = forwardRef((props, ref) => {
             : "img-card-driver-fl row2-autocomplete index-0 animation-right-to-left"
         }
       >
-        <a className="input-autocomplete" onClick={sendDataToPost}>Registrar Puntuaciones</a>
-        <a className="input-autocomplete" onClick={HandleCloseIsReady}>Cancelar</a>
+        <button className="input-autocomplete" onClick={sendDataToPost}>
+          Registrar Puntuaciones
+        </button>
+        <button className="input-autocomplete" onClick={HandleCloseIsReady}>
+          Cancelar
+        </button>
       </div>
       <div
         className={
@@ -402,7 +405,11 @@ export const PointsRegister = forwardRef((props, ref) => {
               : "column1-schemma animation-right-to-left"
           }
         >
-          <Rdrivers ref={childRefDR} deletePosition={deletePosition}  openData={switchAction}/>
+          <Rdrivers
+            ref={childRefDR}
+            deletePosition={deletePosition}
+            openData={switchAction}
+          />
         </div>
       </div>
     </div>
