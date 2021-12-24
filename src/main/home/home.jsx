@@ -99,7 +99,7 @@ export default function Home() {
   const childRefLL = useRef();
   const childRefSE = useRef();
   const childRefOW = useRef();
-  export const loginStatus = async () => {
+  const loginStatus = async () => {
     const url = "/get-autorization";
     const idUsr = localStorage.getItem("id");
     const token = localStorage.getItem("token");
