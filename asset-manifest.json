@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/f1Front-End/static/css/main.e803d780.chunk.css",
-    "main.js": "/f1Front-End/static/js/main.818c5703.chunk.js",
-    "main.js.map": "/f1Front-End/static/js/main.818c5703.chunk.js.map",
-    "runtime-main.js": "/f1Front-End/static/js/runtime-main.2445ace0.js",
-    "runtime-main.js.map": "/f1Front-End/static/js/runtime-main.2445ace0.js.map",
-    "static/js/2.f7af95c2.chunk.js": "/f1Front-End/static/js/2.f7af95c2.chunk.js",
-    "static/js/2.f7af95c2.chunk.js.map": "/f1Front-End/static/js/2.f7af95c2.chunk.js.map",
-    "static/js/3.2bb26983.chunk.js": "/f1Front-End/static/js/3.2bb26983.chunk.js",
-    "static/js/3.2bb26983.chunk.js.map": "/f1Front-End/static/js/3.2bb26983.chunk.js.map",
+    "main.js": "/f1Front-End/static/js/main.2b9abf59.chunk.js",
+    "main.js.map": "/f1Front-End/static/js/main.2b9abf59.chunk.js.map",
+    "runtime-main.js": "/f1Front-End/static/js/runtime-main.98d4b980.js",
+    "runtime-main.js.map": "/f1Front-End/static/js/runtime-main.98d4b980.js.map",
+    "static/js/2.56a2d0f4.chunk.js": "/f1Front-End/static/js/2.56a2d0f4.chunk.js",
+    "static/js/2.56a2d0f4.chunk.js.map": "/f1Front-End/static/js/2.56a2d0f4.chunk.js.map",
+    "static/js/3.31110093.chunk.js": "/f1Front-End/static/js/3.31110093.chunk.js",
+    "static/js/3.31110093.chunk.js.map": "/f1Front-End/static/js/3.31110093.chunk.js.map",
     "index.html": "/f1Front-End/index.html",
     "static/css/main.e803d780.chunk.css.map": "/f1Front-End/static/css/main.e803d780.chunk.css.map",
-    "static/js/2.f7af95c2.chunk.js.LICENSE.txt": "/f1Front-End/static/js/2.f7af95c2.chunk.js.LICENSE.txt",
+    "static/js/2.56a2d0f4.chunk.js.LICENSE.txt": "/f1Front-End/static/js/2.56a2d0f4.chunk.js.LICENSE.txt",
     "static/media/57 sin título_20211010183957.png": "/f1Front-End/static/media/57 sin título_20211010183957.03eb6461.png",
     "static/media/57 sin título_20211010185430.png": "/f1Front-End/static/media/57 sin título_20211010185430.2de370c0.png",
     "static/media/57 sin título_20211010185950.png": "/f1Front-End/static/media/57 sin título_20211010185950.56555584.png",
@@ -95,9 +95,9 @@
     "static/media/logo.c72fcd22.jpg": "/f1Front-End/static/media/logo.c72fcd22.jpg"
   },
   "entrypoints": [
-    "static/js/runtime-main.2445ace0.js",
-    "static/js/2.f7af95c2.chunk.js",
+    "static/js/runtime-main.98d4b980.js",
+    "static/js/2.56a2d0f4.chunk.js",
     "static/css/main.e803d780.chunk.css",
-    "static/js/main.818c5703.chunk.js"
+    "static/js/main.2b9abf59.chunk.js"
   ]
 }
