@@ -99,13 +99,13 @@ export default function Home() {
   const childRefLL = useRef();
   const childRefSE = useRef();
   const childRefOW = useRef();
-  const loginStatus = () => {
+  const loginStatus = async () => {
     const url = "/get-autorization";
     const idUsr = localStorage.getItem("id");
     const token = localStorage.getItem("token");
     if (idUsr && token) {
-      getData(url).then((response) => {
-        console.log(response)
+      await getData(url).then((response) => {
+        console.log(response);
         if (response) {
           setIsLoged(true);
           onLoadPage();
@@ -469,7 +469,7 @@ export default function Home() {
     }
   };
   const onLoadPage = async () => {
-    if (loading ) {
+    if (loading) {
       childRefLL.current.callFnHandleOpen("loading");
       await handleSetWallBackground();
       await choseRndImage().then((responsewall) => {
