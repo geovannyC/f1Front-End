@@ -1585,7 +1585,6 @@ button:hover, input[type = submit]:hover {
   opacity: 1;
   font-size: 500px;
   transform: rotate(-30deg);
-  filter: grayscale();
 }
 .container-image-login{
   /* top: 0; */
@@ -1599,7 +1598,7 @@ button:hover, input[type = submit]:hover {
   filter: grayscale(20%);
 }
 .data-image-hidden{
-  height: 130%;
+  height: 160%;
   filter: grayscale(30%);
 }
 .container-back-logo{

@@ -78,7 +78,6 @@ export const Login = () => {
             if (response2) {
               const getRandomResult =
                 response2[Math.floor(Math.random() * response2.length)];
-              console.log(getRandomResult);
               await findImage(getRandomResult).then((response3) => {
                 if (response3) {
                   setImage(response3);
@@ -118,7 +117,6 @@ export const Login = () => {
                 <input
                   className="input-autocomplete"
                   {...register("onda", { required: true, maxLength: 20 })}
-                  value=""
                 />
                 {errors.onda && (
                   <small className="color-white">Éste es requerido</small>

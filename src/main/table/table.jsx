@@ -70,7 +70,6 @@ export const Table = forwardRef((props, ref) => {
       });
       switchAction(false);
     } else {
-      console.log(paramScuderiasCh)
       setTotalPointsdrivers(paramDriversCh);
       setDrivers(paramDriversVitaeCh);
       setAllDrivers(paramAllDrivers);
