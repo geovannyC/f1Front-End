@@ -47,8 +47,6 @@ export const DriverRegister = forwardRef((props, ref) => {
       alias: dataInput.alias,
       carpetaPiloto: dataInput.folderDriver,
       carpetaCoche: dataInput.f1CarFolder,
-      victorias: 0,
-      vueltasRapidas: 0,
     };
     const url = "/create-driver";
     props.callLoading(formatData, url, "post");

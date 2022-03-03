@@ -124,14 +124,11 @@ export const PointsRegister = forwardRef((props, ref) => {
     });
   };
   const findFalseDriver = async (arr) => {
-    console.log(arr);
     return new Promise((resolve) => {
       const result = arr.every((element) => {
         if (typeof element == "number") {
-          console.log("element");
           return false;
         } else {
-          console.log("no element");
           return true;
         }
       });

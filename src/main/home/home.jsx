@@ -3,6 +3,7 @@ import Menu from "../menu/menu";
 import { Table } from "../table/table";
 import "../../css/style.css";
 import { PodiumV2 } from "../podiumv2/podiumv2";
+import useForceUpdate from "use-force-update";
 import { DriverRegister } from "../driver-register/driverRegister";
 import { RegisterTrack } from "../register-track/registerTrack";
 import { PointsRegister } from "../points-register/pointsRegister";
@@ -10,12 +11,17 @@ import { ScuderiaRegister } from "../scuderia-register/scuderiaRegister";
 import { Championship } from "../championships/championships";
 import { Loading } from "../loading/loading";
 import { LoadingF } from "../loading/loadingFetch";
-import { LoadingAwait } from "../loading/loadingAwait";
+// import { LoadingAwait } from "../loading/loadingAwait";
+import formula1 from "../images/formula.svg";
 import { FaultFormat } from "../fault-register/faultRegister";
 import { ScuderiaEditor } from "../scuderia-editor/scuderiaEditor";
 import { getData, sendData } from "../../until/fetch";
+import { MotorSearch2 } from "../motor-search2.0/motorSearch";
+import { Loadingv2 } from "../loading/loadingv2";
 import { Login } from "../login/login";
+import "./home.css";
 import { OndaWordRegister } from "../ondaWordRegister/ondaWordRegister";
+import { PointsRegister2 } from "../points-register/pointsRegisterV2";
 function useInterval(callback, delay) {
   const savedCallback = useRef();
   useEffect(() => {
@@ -48,9 +54,22 @@ function useInterval2(callback, delay) {
 }
 export default function Home() {
   const [wallBackground, setWallBackground] = useState(false),
+    [data, setData] = useState({
+      allTracks: false,
+      trackCh: false, 
+      allScuderias: false,
+      allChampionships: false,
+      dataCurrentChampionship: false,
+      dataDrivers: false,
+      currentTrack: false,
+    }),
     [step, setStep] = useState(false),
     [isLoged, setIsLoged] = useState(false),
-    [loading, setLoading] = useState(true),
+    [loading, setLoading] = useState({
+      state: true,
+      message: "",
+    }),
+    [listmenu, setListMenu] = useState(false),
     [dataToFetch, setDataToFetch] = useState(false),
     [currentWallpaper, setCurrentWallpaper] = useState(false),
     [previousChangeWall, setPreviousChangeWall] = useState(true),
@@ -64,16 +83,21 @@ export default function Home() {
     [intervalRPoints, setIntervalRPoints] = useState(false),
     [scuderiasCh, setScuderiasCh] = useState(false),
     [championships, setChampionships] = useState(false),
-    [count, setCount] = useState(0),
+    [count, setCount] = useState({
+      timeWallpaper: 0,
+      timeLoading: 0,
+      timeRPintsv2: 0,
+    }),
     [folders, setFolders] = useState(false);
   useEffect(() => {
     loginStatus();
+    firstWall();
     // eslint-disable-next-line
   }, []);
   useInterval(
     () => {
-      sendDataPointsDriver(count);
-      setCount(count + 1);
+      sendDataPointsDriver();
+      setCount({ ...count, timeRPintsv2: count.timeRPintsv2 + 1 });
     },
     intervalRPoints ? 350 : null
   );
@@ -84,11 +108,52 @@ export default function Home() {
     () => {
       changeWall();
     },
-    !loading ? 35000 : null
+    !loading.state ? 35000 : null
   );
+  // useInterval2(
+  //   () => {
+  //     upsetCount();
+  //   },
+  //   loading.state ? 1000 : null
+  // );
+  const sendDataPointsDriver = async () => {
+    const dataDrivers = dataToFetch.data.newSchemma.info;
+    const dataFL = dataToFetch.data.newSchemmaTrack;
+    const lengthDataDrivers = dataDrivers.length;
+    let counter = count.timeRPintsv2;
+    switch (true) {
+      case counter < lengthDataDrivers:
+        return switchAction(
+          "points",
+          `#${dataDrivers[count.timeRPintsv2].posicion + 1} ${
+            dataDrivers[count.timeRPintsv2].prev_driver.nombre
+          }`
+        );
+      case counter >= lengthDataDrivers:
+        switchAction(
+          "points",
+          `Record de vuelta: ${dataFL.record.minuto}:${dataFL.record.segundo}:${dataFL.record.decima}`
+        );
+        setIntervalRPoints(false);
+        return setTimeout(() => {
+          childRefLF.current.callFnHandleClose();
+          // window.location.reload()
+        }, 1500);
+      default:
+        setCount({ ...count, timeRPintsv2: 0 });
+        break;
+    }
+  };
+  const forceUpdate = useForceUpdate();
+  // const upsetCount = () => {
+  //   let newNum = count.timeLoading + 1;
+  //   setCount({ ...count, timeLoading: newNum });
+  //   forceUpdate();
+  // };
   const childRefRT = useRef();
   const childRefRD = useRef();
   const childRefPR = useRef();
+  const childRefPR2 = useRef();
   const childRefTB = useRef();
   const childrenP2 = useRef();
   const childrenSR = useRef();
@@ -105,7 +170,6 @@ export default function Home() {
     const token = localStorage.getItem("token");
     if (idUsr && token) {
       getData(url).then((response) => {
-        console.log(response)
         if (response) {
           setIsLoged(true);
           onLoadPage();
@@ -118,36 +182,61 @@ export default function Home() {
     }
   };
   const switchAction = (value, state) => {
-    if (value === -1) {
+    if (value === 1) {
       childRefOW.current.callFnHandleOpen();
-    } else if (value === 0) {
-      if (state === undefined) {
+    } else if (value === 9) {
+      if (state) {
         childrenP2.current.callFnHandleOpen(tracksCh, driversVitaeCh);
       } else {
         childrenP2.current.callFnHandleClose();
       }
-    } else if (value === 1) {
+    } else if (value === 11) {
       childRefTB.current.callFnHandleOpenTable(
-        scuderiasCh,
-        tracksCh,
-        driversCh,
-        driversVitaeCh,
-        drivers
+        data.dataCurrentChampionship.pistas,
+        data.trackCh,
+        data.dataCurrentChampionship.pilotos,
+        data.dataCurrentChampionship.escuderias,
+        data.dataDrivers
       );
-    } else if (value === 2) {
-      childRefPR.current.callFnRpHandleOpen(scuderiasCh, drivers, currentTrack);
+    } else if (value === 8) {
+      if (state) {
+        childRefPR2.current.callFnHandleOpen(
+          data.dataCurrentChampionship.escuderias,
+          data.dataDrivers,
+          data.currentTrack,
+          data.dataCurrentChampionship._id,
+          data.dataCurrentChampionship.pilotos,
+          data.allScuderias,
+          // currentTrack
+        );
+      } else {
+        childRefPR2.current.callFnHandleClose();
+      }
     } else if (value === 3) {
       childRefRT.current.callFnHandleOpen();
     } else if (value === 4) {
       childRefRD.current.callFnHandleRDOpen(folders);
     } else if (value === 5) {
       childrenSR.current.callFnHandleOpen(drivers, folders);
-    } else if (value === 7) {
+    } else if (value === 10) {
       childRefFF.current.callFnHandleOpen(driversCh, drivers);
-    } else if (value === 8) {
-      childRefSE.current.callFnHandleOpen(scuderias, drivers, folders);
     } else if (value === 6) {
-      childrenCH.current.callFnHandleOpen(tracks, scuderias, championships);
+      childRefSE.current.callFnHandleOpen(scuderias, drivers, folders);
+    } else if (value === 7) {
+      if (state) {
+        childrenCH.current.callFnHandleOpen(
+          data.allTracks,
+          data.allScuderias,
+          data.allChampionships,
+          data.dataDrivers,
+          {
+            id: data.dataCurrentChampionship._id,
+            state: data.dataCurrentChampionship.playing,
+          }
+        );
+      } else {
+        childrenCH.current.callFnHandleClose();
+      }
     } else if (value === "loading" || value === "points") {
       childRefLF.current.callFnHandleOpen(!state ? "cargando" : state);
     } else if (value === "Registrado!") {
@@ -161,30 +250,34 @@ export default function Home() {
       const images = importAll(
         require.context("../images/f1logos/", false, /\.(png|jpe?g|svg)$/)
       );
-      let arrImages = [];
-      function fndMapImages() {
-        images.forEach((element) => {
-          arrImages.push(element.default);
-        });
-      }
-      resolve(fndMapImages());
-      setWallBackground(arrImages);
+      // let arrImages = [];
+
+      resolve(
+        images.map((element) => {
+          return element.default;
+        })
+      );
+      // setWallBackground(arrImages);
     });
   };
-  const choseRndImage = () => {
+  const firstWall = async () => {
+    await handleSetWallBackground().then(async (response) => {
+      await choseRndImage(response);
+    });
+  };
+  const choseRndImage = (image) => {
+    let arrImgs = image ? image : wallBackground;
     return new Promise((resolve) => {
-      let item =
-        wallBackground[Math.floor(Math.random() * wallBackground.length)];
+      let item = arrImgs[Math.floor(Math.random() * arrImgs.length)];
+      setCurrentWallpaper(item);
       resolve(item);
     });
   };
   const changeWall = () => {
     setPreviousChangeWall(false);
     setTimeout(async () => {
-      await choseRndImage().then((response) => {
-        setPreviousChangeWall(true);
-        setCurrentWallpaper(response);
-      });
+      await choseRndImage();
+      setPreviousChangeWall(true);
     }, 4000);
   };
   const findPlayingCh = async (arr) => {
@@ -225,402 +318,201 @@ export default function Home() {
     });
     switchAction("loading");
   };
-  const sendDataPointsDriver = async (index) => {
-    let flap = dataToFetch.data.dataFasLap;
-    let ruleteD = dataToFetch.data.dataRulete;
-    let url = dataToFetch.url;
-    let urlCh = "/update-track-championship";
-    let urlDriver = "/update-driver";
-    let urlUpdateScuderia = "/update-scuderia";
-    let urlUpdateChampionshipScuderia = "/update-championship-scuderia";
-    let urlUpdateChampionshipDriver = "/update-championship-driver";
-    let urlCreateChampionshipScuderia = "/create-championship-scuderia";
-    let urlCreateChampionshipDriver = "/create-championship-driver";
-    if (ruleteD.length > index) {
-      let shemmaToPost = {
-        piloto: ruleteD[index].driver._id,
-        pistaCampeonato: flap.track._id,
-        championship: flap.championship._id,
-        posicion: ruleteD[index].posicion,
-        puntos: ruleteD[index].puntos,
-      };
-      setIntervalRPoints(false);
-      sendData(JSON.stringify(shemmaToPost), url.urlDriverVitae).then(
-        async (response) => {
-          if (!response) {
-            switchAction("error");
-            setIntervalRPoints(false);
-          }
-          if (response) {
-            let urlChampionshipScuderia = `/find-championship-scuderia/${ruleteD[index].escuderia.escuderia._id}/${ruleteD[index].escuderia.championship._id}`;
-            let urlDriverChampionship = `/find-championship-driver/${shemmaToPost.piloto}/${shemmaToPost.championship}`;
-            let shemmaChampionshipScuderia = {
-              escuderia: ruleteD[index].escuderia.escuderia._id,
-              championship: ruleteD[index].escuderia.championship._id,
-              victorias: 0,
-              sanciones: 0,
-              puntos: 0,
-            };
-            let shemaDriverChampionship = {
-              piloto: shemmaToPost.piloto,
-              championship: shemmaToPost.championship,
-              puntos: 0,
-            };
-            setIntervalRPoints(false);
-            await getData(urlChampionshipScuderia).then(async (responseSCH) => {
-              if (responseSCH) {
-                shemmaChampionshipScuderia._id = responseSCH[0]._id;
-                shemmaChampionshipScuderia.puntos =
-                  responseSCH[0].puntos + shemmaToPost.puntos;
-                setIntervalRPoints(false);
-                await sendData(
-                  JSON.stringify(shemmaChampionshipScuderia),
-                  urlUpdateChampionshipScuderia
-                ).then((responseSCH) => {
-                  if (!responseSCH) {
-                    switchAction("error");
-                    setIntervalRPoints(false);
-                  }
-                });
-              } else {
-                shemmaChampionshipScuderia.puntos = shemmaToPost.puntos;
-                setIntervalRPoints(false);
-                await sendData(
-                  JSON.stringify(shemmaChampionshipScuderia),
-                  urlCreateChampionshipScuderia
-                ).then((responseCC) => {
-                  if (responseCC) {
-                    switchAction("error");
-                    setIntervalRPoints(false);
-                  }
-                });
-              }
-            });
-            setIntervalRPoints(false);
-            await getData(urlDriverChampionship).then(async (responceDCH) => {
-              if (responceDCH) {
-                shemaDriverChampionship._id = responceDCH[0]._id;
-                shemaDriverChampionship.puntos =
-                  responceDCH[0].puntos + shemmaToPost.puntos;
-                setIntervalRPoints(false);
-                await sendData(
-                  JSON.stringify(shemaDriverChampionship),
-                  urlUpdateChampionshipDriver
-                ).then((responseUCHD) => {
-                  if (!responseUCHD) {
-                    switchAction("error");
-                    setIntervalRPoints(false);
-                  }
-                });
-              } else {
-                shemaDriverChampionship.puntos = shemmaToPost.puntos;
-                shemaDriverChampionship.sanciones = 0;
-                setIntervalRPoints(false);
-                await sendData(
-                  JSON.stringify(shemaDriverChampionship),
-                  urlCreateChampionshipDriver
-                ).then((responseCD) => {
-                  if (!responseCD) {
-                    switchAction("error");
-                    setIntervalRPoints(false);
-                  }
-                });
-              }
-            });
-            if (index === 0) {
-              let shemmaUpdateDriver = {
-                _id: ruleteD[0].driver._id,
-                victorias: ruleteD[0].driver.victorias + 1,
-              };
-              setIntervalRPoints(false);
-              sendData(JSON.stringify(shemmaUpdateDriver), urlDriver).then(
-                (response) => {
-                  let driverPosition1 = ruleteD[0].escuderia.escuderia;
-                  let driverPosition2 = ruleteD[1].escuderia.escuderia;
-                  let dob = driverPosition1._id === driverPosition2._id;
-                  let arr = driverPosition1.doblete;
-                  let victories = driverPosition1.victorias
-                    ? driverPosition1.victorias
-                    : 0;
-                  if (response) {
-                    let schemmaUpdateScuderia = {
-                      _id: driverPosition1._id,
-                      escuderia: ruleteD[0].escuderia._id,
-                      championship: shemmaToPost.championship,
-                      victorias: victories + 1,
-                      doblete: dob ? arr + 1 : arr,
-                    };
-                    setIntervalRPoints(false);
-                    sendData(
-                      JSON.stringify(schemmaUpdateScuderia),
-                      urlUpdateScuderia
-                    ).then((response) => {
-                      if (response) {
-                        setIntervalRPoints(false);
-                        sendData(
-                          JSON.stringify(schemmaUpdateScuderia),
-                          urlUpdateChampionshipScuderia
-                        ).then((response2) => {
-                          if (response2) {
-                            setIntervalRPoints(true);
-                            switchAction(
-                              "points",
-                              ruleteD[index].driver.nombre
-                            );
-                          } else {
-                            switchAction("error");
-                            setIntervalRPoints(false);
-                          }
-                        });
-                      } else {
-                        switchAction("error");
-                        setIntervalRPoints(false);
-                      }
-                    });
-                  } else {
-                    switchAction("error");
-                    setIntervalRPoints(false);
-                  }
-                }
-              );
-            } else {
-              setIntervalRPoints(true);
-              switchAction("points", ruleteD[index].driver.nombre);
-            }
-          }
-        }
-      );
-    } else if (ruleteD.length === index) {
-      let shemmaToPost = {
-        piloto: flap.driver._id,
-        pistaCampeonato: flap.track._id,
-        time: [flap.minute, flap.seconds, flap.miliseconds],
-        championship: flap.championship._id,
-        posicion: flap.posicion,
-      };
-      setIntervalRPoints(false);
-      sendData(JSON.stringify(shemmaToPost), url.urlFlapDriver).then(
-        (response) => {
-          if (!response) {
-            switchAction("error");
-            setIntervalRPoints(false);
-          } else {
-            switchAction("points", `Vuelta Rápida de ${flap.driver.nombre}`);
-            setIntervalRPoints(true);
-          }
-        }
-      );
-    } else if (ruleteD.length + 1 === index) {
-      if (typeof flap.isRecord === "object") {
-        setIntervalRPoints(false);
-        sendData(JSON.stringify(flap.isRecord), url.urlUpdateTrack).then(
-          (response) => {
-            if (!response) {
-              switchAction("error");
-              setIntervalRPoints(false);
-            } else {
-              switchAction(
-                "points",
-                `Nuevo record de pista en ${flap.track.nombre}`
-              );
-              setIntervalRPoints(true);
-            }
-          }
-        );
-      }
-    } else {
-      setIntervalRPoints(false);
-      let shemmaCurrentTracl = {
-        idTrackChampionship: currentTrack._id,
-        estado: true,
-      };
-      sendData(JSON.stringify(shemmaCurrentTracl), urlCh).then((response) => {
-        if (response) {
-          switchAction("points", `Puntos Registrados`);
-          onLoadPage();
-        } else {
-          switchAction("error");
-          setIntervalRPoints(false);
-          onLoadPage();
-        }
-      });
-    }
+  const fnSendData = async (data, url) => {
+    return await sendData(JSON.stringify(data), url);
   };
   const goData = async () => {
     if (dataToFetch.type === "post") {
       switchAction("loading", "Cagando");
-      await sendData(JSON.stringify(dataToFetch.data), dataToFetch.url).then(
-        (response) => {
-          if (response) {
-            switchAction("Registrado!", "Registrado!");
-            onLoadPage();
-          } else {
-            switchAction("error", "error");
-            setIntervalRPoints(false);
-            onLoadPage();
-          }
+      await fnSendData(dataToFetch.data, dataToFetch.url).then((response) => {
+        if (response) {
+          switchAction("Registrado!", "Registrado!");
+          onLoadPage();
+        } else {
+          switchAction("error", "error");
+          setIntervalRPoints(false);
+          onLoadPage();
         }
-      );
+      });
+    } else if (dataToFetch.type === "changueChampionship") {
+      switchAction("loading", "Cagando");
+      await fnSendData(dataToFetch.data.formatCurrnChange, dataToFetch.url);
+      await fnSendData(dataToFetch.data.formatNewChChangue, dataToFetch.url);
+      switchAction("Registrado!", "Registrado!");
     } else if (dataToFetch.type === "postPoints") {
+      switchAction("points", "Registrando Pilotos");
+      await fnSendData(
+        dataToFetch.data.newSchemma,
+        dataToFetch.url.urlTrackVitae
+      );
+      await fnSendData(
+        dataToFetch.data.newSchemmaTrack,
+        dataToFetch.url.urlInsertRecord
+      );
+      await fnSendData(
+        dataToFetch.data.newSchemmaUpdateVictoryDriver,
+        dataToFetch.url.urlUpdateVictoryDriver
+      );
+      await fnSendData(
+        dataToFetch.data.newSchemmaUpdateStateTrack,
+        dataToFetch.url.urlUpdateStateCH
+      );
+      await fnSendData(
+        dataToFetch.data.newSchemmaUpdateVictoryScuderia,
+        dataToFetch.url.urlUpdateVictoryScuderia
+      );
+      if(dataToFetch.url.schemmaUpdateDobleteScuderia.state){
+        await fnSendData(
+          dataToFetch.data.newSchemmaDoubleteScuderia,
+          dataToFetch.url.schemmaUpdateDobleteScuderia.url
+        );
+      }
+      await fnSendData(dataToFetch.data.newSchemmaTotalPoints, dataToFetch.url.urlUpdateCurrentChampionship)
       setTimeout(() => {
-        switchAction("points", "Cagando");
         setIntervalRPoints(true);
       }, 1500);
     }
   };
+  const findStatusFalseTrack = (arr) => {
+    return new Promise((resolve) => {
+      resolve(arr.find((element) => !element.estado));
+    });
+  };
   const onLoadPage = async () => {
-    if (loading ) {
-      childRefLL.current.callFnHandleOpen("loading");
-      await handleSetWallBackground();
-      await choseRndImage().then((responsewall) => {
-        setCurrentWallpaper(responsewall);
-      });
-      await getData("/find-folders").then((response) => {
-        if (response) {
-          setFolders(response);
-        }
-      });
-      await getData("/find-track").then(async (response) => {
-        if (response) {
-          setTracks(response);
-          if (response.length > 1) {
-            await getData("/find-driver").then(async (response2) => {
-              setDrivers(response2);
-              if (response2) {
-                if (response2.length > 1) {
-                  await getData("/find-scuderia").then(async (response3) => {
-                    if (response3) {
-                      setScuderias(response3);
-                      if (response3.length > 1) {
-                        await getData("/findChampionship").then(
-                          async (response4) => {
-                            if (response4) {
-                              setChampionships(response4);
-                              await findPlayingCh(response4).then(
-                                async (findCrrCh) => {
-                                  if (findCrrCh) {
-                                    await getData(
-                                      `/find-track-championship/${findCrrCh._id}`
-                                    ).then(async (tracksCham) => {
-                                      if (tracksCham) {
-                                        let orderTracks = tracksCham.sort(
-                                          (a, b) => {
-                                            return a.posicion - b.posicion;
-                                          }
-                                        );
+    let schemmaMenu = [];
+    let newData = { ...data };
+    const urlgetAllCh = "/findChampionship";
+    const urlgetAllDrivers = "/find-driver";
+    const urlgetAllTracks = "/find-track";
+    const urlgetAllScuderias = "/find-scuderia";
+    if (loading.state) {
+      newData.allTracks = await getData(urlgetAllTracks);
+      newData.allScuderias = await getData(urlgetAllScuderias);
+      newData.dataDrivers = await getData(urlgetAllDrivers);
+      newData.allChampionships = await getData(urlgetAllCh);
+      newData.allTracks &&
+        newData.dataDrivers &&
+        schemmaMenu.push({ title: "Registrar Palabras Ondas", value: 1 });
+      schemmaMenu.push(
+        { title: "Registrar Pista", value: 3 },
+        { title: "Registrar Piloto", value: 4 }
+      );
+      newData.dataDrivers &&
+        schemmaMenu.push({ title: "Registrar Scuderia", value: 5 });
+      newData.allScuderias &&
+        schemmaMenu.push(
+          { title: "Campeonatos", value: 7 },
+          { title: "Editar Escuderia", value: 6 }
+        );
+      if (newData.allChampionships) {
+        let stateCh = await MotorSearch2(
+          true,
+          newData.allChampionships,
+          "playing"
+        );
+        if (stateCh) {
+          let urlgetFindCh = `/find-by-id-championship?id=${stateCh._id}`;
+          let urlgetTrackCh = `/get-track-vitae-by-ch?idChampionship=${stateCh._id}`
+          newData.dataCurrentChampionship = await getData(urlgetFindCh);
+          newData.trackCh = await getData(urlgetTrackCh)
+          newData.currentTrack = await findStatusFalseTrack(
+            newData.dataCurrentChampionship.pistas
+          );
+          switch (true) {
+            case newData.currentTrack &&
+              newData.dataCurrentChampionship.pistas[0].estado:
+              schemmaMenu.push(
+                { title: "Registrar Puntuaciones", value: 8 },
+                { title: "Ver Podium", value: 9 },
+                { title: "Registrar Sanción", value: 10 },
+                { title: "Tabla de Puntuaciones", value: 11 }
+              );
+              break;
+            case !newData.dataCurrentChampionship.pistas[0].estado:
+              schemmaMenu.push({ title: "Registrar Puntuaciones", value: 8 });
+              break;
+            case !newData.currentTrack:
+              schemmaMenu.push(
+                { title: "Ver Podium", value: 9 },
+                { title: "Registrar Sanción", value: 10 },
+                { title: "Tabla de Puntuaciones", value: 11 }
+              );
+              break;
 
-                                        let currentTrack =
-                                          await findCurrentTrack(tracksCham);
-                                        setTracksCh(orderTracks);
-                                        setCurrentTrack(currentTrack);
-                                        await getData(
-                                          `/find-championship-scuderias/${findCrrCh._id}`
-                                        ).then(async (scuderiasCham) => {
-                                          setScuderiasCh(scuderiasCham);
-                                          if (scuderiasCham) {
-                                            await getData(
-                                              `/find-all-drivers-championship/${findCrrCh._id}`
-                                            ).then(async (response5) => {
-                                              if (response5) {
-                                                setDriversCh(response5);
-                                                await getData(
-                                                  `/find-driver-vitae-championship/${findCrrCh._id}`
-                                                ).then(async (response7) => {
-                                                  if (response7) {
-                                                    if (currentTrack) {
-                                                      setCurrentTrack(
-                                                        currentTrack
-                                                      );
-                                                      setStep(6);
-                                                      setLoading(false);
-                                                      childRefLL.current.callFnHandleClose();
-                                                    } else {
-                                                      setStep(10);
-                                                      setLoading(false);
-                                                      childRefLL.current.callFnHandleClose();
-                                                    }
-                                                    setDriversVitaeCh(
-                                                      response7
-                                                    );
-                                                  } else {
-                                                    setStep(5);
-                                                    setLoading(false);
-                                                    childRefLL.current.callFnHandleClose();
-                                                  }
-                                                });
-                                              } else {
-                                                setStep(5);
-                                                setLoading(false);
-                                                childRefLL.current.callFnHandleClose();
-                                              }
-                                            });
-                                          } else {
-                                            setStep(4);
-                                            setLoading(false);
-                                            childRefLL.current.callFnHandleClose();
-                                          }
-                                        });
-                                      } else {
-                                        setStep(4);
-                                        setLoading(false);
-                                        childRefLL.current.callFnHandleClose();
-                                      }
-                                    });
-                                  } else {
-                                    setStep(4);
-                                    setLoading(false);
-                                    childRefLL.current.callFnHandleClose();
-                                  }
-                                }
-                              );
-                            } else {
-                              setStep(4);
-                              setLoading(false);
-                              childRefLL.current.callFnHandleClose();
-                            }
-                          }
-                        );
-                      } else {
-                        setStep(3);
-                        setLoading(false);
-                        childRefLL.current.callFnHandleClose();
-                      }
-                    } else {
-                      setStep(3);
-                      setLoading(false);
-                      childRefLL.current.callFnHandleClose();
-                    }
-                  });
-                } else {
-                  setStep(2);
-                  setLoading(false);
-                  childRefLL.current.callFnHandleClose();
-                }
-              } else {
-                setStep(2);
-                setLoading(false);
-                childRefLL.current.callFnHandleClose();
-              }
-            });
+            default:
+              break;
           }
-        } else {
-          setStep(1);
-          setLoading(false);
-          childRefLL.current.callFnHandleClose();
         }
-      });
-      if (!currentWallpaper) {
-        choseRndImage();
-        changeWall();
       }
+      console.log(newData);
+      setListMenu(schemmaMenu);
+      setLoading({ ...loading, state: false });
+    } else {
+      setLoading({ ...loading, state: false, message: "error" });
     }
+    setData(newData);
+    // if (loading.state) {
+    //   await getData(urlgetAllCh).then(async (response) => {
+    //     if (response) {
+    //       let arrTracks = await getData(urlgetAllTracks);
+    //       let arrDrivers = await getData(urlgetAllDrivers);
+    //       let arrScuderias = await getData(urlgetAllScuderias);
+    //       let stateCh = await MotorSearch2(true, response, "playing");
+    //       if (stateCh) {
+    //         let urlgetFindCh = `/find-by-id-championship?id=${stateCh._id}`;
+    //         await getData(urlgetFindCh).then(async (response2) => {
+    //           if (response2) {
+    //             let stateTracksCh = await findStatusFalseTrack(
+    //               response2.pistas
+    //             );
+    //             setData({
+    //               ...data,
+    //               allTracks: arrTracks,
+    //               allScuderias: arrScuderias,
+    //               dataCurrentChampionship: response2,
+    //               allChampionships: response,
+    //               dataDrivers: arrDrivers,
+    //               currentTrack: stateTracksCh,
+    //             });
+    //             if (stateTracksCh) {
+    //               let compare = stateTracksCh === response2.pistas[0];
+    //               if (compare) {
+    //                 setStep(5);
+    //                 setLoading({ ...loading, state: false });
+    //               } else {
+    //                 setStep(6);
+    //                 setLoading({ ...loading, state: false });
+    //               }
+    //             } else {
+    //               let urlGetTrackVitae = `/get-track-vitae/`;
+    //               setStep(10);
+    //               setLoading({ ...loading, state: false });
+    //             }
+    //           } else {
+    //             setData({
+    //               ...data,
+    //               allChampionships: response,
+    //               dataDrivers: arrDrivers,
+    //             });
+    //             setLoading({ ...loading, state: false, message: "error" });
+    //           }
+    //         });
+    //       } else {
+    //         setStep(4);
+    //         setLoading({ ...loading, state: false });
+    //       }
+    //     } else {
+    //       setLoading({ ...loading, state: false, message: "error" });
+    //     }
+    //   });
+    // }
   };
   const SchemmaSwitchComponents = () => {
     return (
       <div className="containerHome">
         {CapWall()}
         <img alt="" src={currentWallpaper} className="image-wall" />
-        <Menu optionMenu={optionMenu} step={step} />
+        <Menu listmenu={listmenu} optionMenu={optionMenu} step={step} />
         {/* <FLap/> */}
         {/* <div className="temcontainer"> */}
         {/* <Rdrivers/> */}
@@ -629,25 +521,37 @@ export default function Home() {
         {/* <DataDriver ref={childRefDD}/> */}
         {/* <CardsPodium ref={childrenP2} /> */}
         <LoadingF ref={childRefLF} callFetch={() => goData()} />
-        <Loading ref={childRefLL} />
-        <Championship
-          ref={childrenCH}
-          callLoading={onLoadPage}
-          callLoading2={prevData}
-        />
-        <ScuderiaEditor ref={childRefSE} />
+        {/* <Loading ref={childRefLL} /> */}
+        <Championship ref={childrenCH} callLoading={prevData} />
+        <PointsRegister2 ref={childRefPR2} callLoading={prevData} />
+        <ScuderiaEditor ref={childRefSE} callLoading={prevData} />
         <FaultFormat ref={childRefFF} callLoading={prevData} />
         <ScuderiaRegister ref={childrenSR} callLoading={prevData} />
         <PodiumV2 ref={childrenP2} />
         <Table ref={childRefTB} />
-        <PointsRegister ref={childRefPR} callLoading={prevData} />
+        {/* <PointsRegister ref={childRefPR} callLoading={prevData} /> */}
         <RegisterTrack ref={childRefRT} callLoading={prevData} />
         <DriverRegister ref={childRefRD} callLoading={prevData} />
-        <LoadingAwait ref={childRefLA} />
+        {/* <LoadingAwait ref={childRefLA} /> */}
         <OndaWordRegister ref={childRefOW} callLoading={prevData} />
       </div>
     );
   };
+  // const SchemmaLoading = () => {
+  //   return (
+  //     <div className="general-container">
+  //       <img
+  //         src={formula1}
+  //         alt=""
+  //         className={
+  //           count.timeLoading % 2
+  //             ? "filter-loading"
+  //             : "filter-loading filter-off"
+  //         }
+  //       />
+  //     </div>
+  //   );
+  // };
   const SchemmaLogin = () => {
     return (
       <div className="containerHome">
@@ -657,7 +561,11 @@ export default function Home() {
   };
   const SwicthLoginHome = () => {
     if (isLoged) {
-      return SchemmaSwitchComponents();
+      if (loading.state) {
+        return <Loadingv2 />;
+      } else {
+        return SchemmaSwitchComponents();
+      }
     } else {
       return SchemmaLogin();
     }

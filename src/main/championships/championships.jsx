@@ -4,87 +4,115 @@ import React, {
   useImperativeHandle,
 } from "react";
 import useForceUpdate from "use-force-update";
-import { sendData } from "../../until/fetch";
-export const Championship = forwardRef((props, ref) => {
+import { choseRandomItem } from "../chose-random-Intem/choseRandomItem";
+
+export const Championship = forwardRef(({callLoading}, ref) => {
   const [open, setOpen] = useState(false),
-    [dataScuderia, setDataScuderia] = useState(false),
+    [rivalChoosed, setRivalChoosed] = useState({
+      driver: false,
+      scuderia: false,
+    }),
     [name, setName] = useState(false),
-    [dataTracks, setDataTracks] = useState(false),
+    [data, setData] = useState({
+      AllTracks: false,
+      AllScuderias: false,
+      AllChampionships: false,
+      AllDrivers: false,
+      currentCh: false,
+    }),
     [openFormNC, setOpenFormNC] = useState(false),
-    [championships, setChampionships] = useState(false),
-    [tracksSelected, setTracksSelected] = useState([]),
-    [scuderiasSelected, setScuderiasSelected] = useState([]);
+    [dataSelected, setDataSelected] = useState({
+      tracksSelected: [],
+      scuderiasSelected: [],
+      driversSelected: []
+    });
   useImperativeHandle(ref, () => ({
-    callFnHandleOpen(tracks, scuderias, championships) {
-      handleOpen(tracks, scuderias, championships);
+    callFnHandleOpen(paramTracks, paramScuderias, paramChampionships, paramDrivers, paramCurrentCh) {
+      handleOpen(paramTracks, paramScuderias, paramChampionships, paramDrivers,paramCurrentCh);
+    },
+    callFnHandleClose() {
+      handleClose();
     },
   }));
   const forceUpdate = useForceUpdate();
   const handleOpenFormNC = () => {
     openFormNC ? setOpenFormNC(false) : setOpenFormNC(true);
   };
-  const handleOpen = (tracks, scuderias, championships) => {
-    console.log(championships);
-    if (open) {
-      setOpen(false);
-      setDataScuderia(false);
-      setName(false);
-      setDataTracks(false);
-      setOpenFormNC(false);
-      setChampionships(false);
-      setTracksSelected(false);
-    } else {
-      setDataScuderia(scuderias);
-      setDataTracks(tracks);
-      setChampionships(championships);
+  const handleOpen = (paramTracks, paramScuderias, paramChampionships, paramDrivers,paramCurrentCh) => {
+    setData({
+      AllScuderias: paramScuderias,
+      AllDrivers: paramDrivers,
+      AllTracks: paramTracks,
+      AllChampionships: paramChampionships,
+      currentCh: paramCurrentCh,
+    })
+    setTimeout(() => {
       setOpen(true);
-    }
+    }, 200);
   };
-  const findTrack = (arr, value) => {
-    let result = arr.every((element) => {
-      if (element === value) {
-        return false;
-      } else {
-        return true;
-      }
-    });
-    return result;
+  const handleClose = () => {
+    setData({
+      AllTracks: false,
+      AllScuderias: false,
+      AllChampionships: false,
+      AllDrivers: false
+    })
+    setOpen(false);
+    setName(false);
+    setOpenFormNC(false);
+    setDataSelected({
+      tracksSelected: [],
+      scuderiasSelected: [],
+      driversSelected: []
+    })
+  };
+
+  const findTrack = (arrValues,value) => {
+    let arr = arrValues
+    if (arr) {
+      let result = arr.every((element) => {
+        if (element === value) {
+          return false;
+        } else {
+          return true;
+        }
+      });
+      return result;
+    } else {
+      return false;
+    }
   };
   const fnTrackSelected = async (event) => {
-    let arr = tracksSelected;
-    if (arr.length === 0) {
-      arr.push(event);
+    let newArr = [...dataSelected.tracksSelected];
+    if (newArr.length === 0) {
+      newArr.push(event);
     } else {
-      if (!findTrack(arr, event)) {
-        console.log(arr.indexOf(event));
-        arr.splice(arr.indexOf(event), 1);
+      if (!findTrack( newArr,event)) {
+        newArr.splice(newArr.indexOf(event), 1);
       } else {
-        arr.push(event);
+        newArr.push(event);
       }
     }
-    setTracksSelected(arr);
+    setDataSelected({...dataSelected, tracksSelected: newArr})
     forceUpdate();
   };
   const fnScuderiaSelected = (event) => {
-    let arr = scuderiasSelected;
-    if (arr.length === 0) {
-      arr.push(event);
+    let newArrScuderias = [...dataSelected.scuderiasSelected];
+    let newArrDrivers = [...dataSelected.driversSelected];
+    if (newArrScuderias.length === 0) {
+      newArrScuderias.push(event);
+      newArrDrivers.push(event.piloto1,event.piloto2)
     } else {
-      if (!findTrack(arr, event)) {
-        arr.splice(arr.indexOf(event), 1);
+      if (!findTrack(newArrScuderias, event)) {
+        newArrScuderias.splice(newArrScuderias.indexOf(event), 1);
+        newArrDrivers.splice(newArrScuderias.indexOf(event.piloto1),1)
+        newArrDrivers.splice(newArrScuderias.indexOf(event.piloto2),1)
       } else {
-        arr.push(event);
+        newArrScuderias.push(event);
+        newArrDrivers.push(event.piloto1,event.piloto2)
       }
     }
-    console.log(arr);
-    setScuderiasSelected(arr);
-    // if (!arr[event] && arr[event] !== 0) {
-    //   arr[event] = event;
-    // } else {
-    //   arr[event] = false;
-    // }
-    // setTracksSelected(arr);
-    // console.log(arr);
+    setDataSelected({...dataSelected, scuderiasSelected: newArrScuderias, driversSelected: newArrDrivers})
     forceUpdate();
   };
   const shuffle = (array) => {
@@ -96,87 +124,104 @@ export const Championship = forwardRef((props, ref) => {
   };
   const findByState = () => {
     return new Promise((resolve) => {
-      const result = championships.find((element) => element.playing === true);
+      const result = data.AllChampionships.find((element) => element.playing === true);
       resolve(result);
     });
   };
   const handleChangeCurrentChampionship = async (value) => {
     let urlCh = "/update-champuonship";
-    let currntCh = await findByState();
-    if (currntCh) {
+    let formatNewChChangue = {
+      id: value._id,
+      data: {
+        playing: value.playing?false:true,
+      }
+    };
+    if(value._id===data.currentCh.id){
+      callLoading(formatNewChChangue, urlCh, "post");
+      handleOpen();
+    }else{
       let formatCurrnChange = {
-        _id: currntCh._id,
-        playing: false,
+        _id: data.currentCh.id,
+        playing: data.currentCh.state?false:true,
       };
-      props.callLoading2(formatCurrnChange, urlCh, "post");
-      handleOpen();
-    } else {
-      let formatChange = {
-        _id: value._id,
-        playing: true,
-      };
-      props.callLoading2(formatChange, urlCh, "post");
-      handleOpen();
+      let schemma = {
+        formatCurrnChange,
+        formatNewChChangue
+      }
+      callLoading(schemma, urlCh, "changueChampionship");
     }
   };
   let shuffleTracks = async () => {
-    let arr = await shuffle(tracksSelected);
-    setTracksSelected(arr);
+    let newArr = [...dataSelected.tracksSelected]
+    await shuffle(newArr);
+    setDataSelected({...dataSelected, tracksSelected: newArr})
+    
     forceUpdate();
   };
+  const buildSchemmaTracks = (tracks) => {
+    return new Promise((resolve, reject) => {
+      // eslint-disable-next-line array-callback-return
+      resolve(
+        tracks.map((item) => {
+          return {
+            posicion: tracks.indexOf(item),
+            estado: false,
+            pista: item._id,
+          };
+        })
+      );
+    });
+  };
+  const buildSchemmaScuderias = (scuderias) => {
+    return new Promise((resolve) => {
+      resolve(
+        scuderias.map((item) => {
+          return {
+            puntos: 0,
+            escuderia: item._id,
+            sanciones: 0,
+            advertencias: 0,
+          };
+        })
+      );
+    });
+  };
+  const buildSchemmaDrivers = (drivers) => {
+    return new Promise((resolve) => {
+      resolve(
+        drivers.map((item) => {
+          return {
+            piloto: item._id,
+            puntos: 0,
+            sanciones: 0,
+            advertencias: 0,
+          };
+        })
+      );
+    });
+  };
   const buildShemma = async () => {
-    const urlCh = "/create-championship";
-    const urlTcks = "/create-tracks-champuonship";
-    const urlScu = "/create-championship-scuderia";
-    let formatChampionship = {
+    let shemmaTracks = await buildSchemmaTracks([...dataSelected.tracksSelected]);
+    let shemmaScuderias = await buildSchemmaScuderias([...dataSelected.scuderiasSelected]);
+    let shemmaDrivers = await buildSchemmaDrivers([...dataSelected.driversSelected]);
+    const shemmaChampionship = {
       nombre: name,
       playing: false,
-    };
-    if (tracksSelected.length > 1 && scuderiasSelected.length > 1) {
-      await sendData(JSON.stringify(formatChampionship), urlCh).then(
-        (resultCh) => {
-          if (resultCh) {
-            tracksSelected.map(async (result) => {
-              let formatTracks = {
-                championship: resultCh._id,
-                pista: result._id,
-                posicion: tracksSelected.indexOf(result),
-                estado: false,
-              };
-              await sendData(JSON.stringify(formatTracks), urlTcks);
-            });
-
-            scuderiasSelected.map(async (result) => {
-              let formatScuderias = {
-                championship: resultCh._id,
-                escuderia: result._id,
-                doblete: 0,
-                victorias: 0,
-                puntos: 0,
-                sanciones: 0,
-              };
-              console.log(formatScuderias);
-              await sendData(JSON.stringify(formatScuderias), urlScu).then(
-                (resultSC) => {
-                  if (resultSC) {
-                    props.callLoading();
-                    handleOpen();
-                  }
-                }
-              );
-            });
-          }
-        }
-      );
+      pistas: shemmaTracks,
+      escuderias: shemmaScuderias,
+      pilotos: shemmaDrivers
     }
+    const urlCh = "/create-championship";
+    callLoading(shemmaChampionship, urlCh, "post")
   };
   const drawTracksSelected = () => {
-    if (tracksSelected) {
-      return tracksSelected.map((result) => {
+    let arrTrackSelected = dataSelected.tracksSelected
+    if (arrTrackSelected) {
+      return arrTrackSelected.map((result) => {
         if (result) {
           return (
             <div className="container-tracks-selected">
-              <small>{`${tracksSelected.indexOf(result) + 1}`}</small>
+              <small>{`${arrTrackSelected.indexOf(result) + 1}`}</small>
               <small>{`${result.nombre}`}</small>
             </div>
           );
@@ -189,13 +234,22 @@ export const Championship = forwardRef((props, ref) => {
     }
   };
   const drawScuderiasSelected = () => {
-    if (scuderiasSelected) {
-      return scuderiasSelected.map((result) => {
+    let arrScuderiasSelected = dataSelected.scuderiasSelected
+    if (arrScuderiasSelected) {
+      return arrScuderiasSelected.map((result) => {
         if (result) {
           return (
-            <div className="container-tracks-selected">
-              <small>{`${scuderiasSelected.indexOf(result) + 1}`}</small>
-              <small>{`${result.nombreEscuderia}`}</small>
+            <div
+              className={
+                rivalChoosed.scuderia === result.nombreEscuderia
+                  ? "container-tracks-selected red-txt"
+                  : "container-tracks-selected"
+              }
+            >
+              <small>{`${arrScuderiasSelected.indexOf(result) + 1}`}</small>
+              <small>{`${result.nombreEscuderia}-${
+                rivalChoosed.driver ? rivalChoosed.driver : ""
+              }`}</small>
             </div>
           );
         } else {
@@ -206,9 +260,25 @@ export const Championship = forwardRef((props, ref) => {
       return null;
     }
   };
-
+  const selectRandomScuderia = async () => {
+    let arrScuderiasSelected = [...dataSelected.scuderiasSelected]
+    let itm = await choseRandomItem(arrScuderiasSelected);
+    return itm;
+  };
+  const selectRandomDriver = async () => {
+    let scuderiaChosed = await selectRandomScuderia();
+    let driver = await choseRandomItem([
+      scuderiaChosed.piloto1,
+      scuderiaChosed.piloto2,
+    ]);
+    setRivalChoosed({
+      scuderia: scuderiaChosed.nombreEscuderia,
+      driver: driver.nombre,
+    });
+    forceUpdate();
+  };
   const ContainerChampionship = () => {
-    if (dataTracks) {
+    if (open) {
       return (
         <div className="general-container">
           <div className="grid-five-rows-25">
@@ -225,13 +295,22 @@ export const Championship = forwardRef((props, ref) => {
                 type="text"
                 onChange={handleChangeName}
               />
-              {tracksSelected.length > 1 && openFormNC ? (
+              {dataSelected.tracksSelected.length > 1 && openFormNC ? (
                 <button
                   type="Button"
                   className="input-autocomplete"
                   onClick={shuffleTracks}
                 >
                   Mezclar Pistas
+                </button>
+              ) : null}
+              {dataSelected.scuderiasSelected.length > 1 && openFormNC ? (
+                <button
+                  type="Button"
+                  className="input-autocomplete"
+                  onClick={selectRandomDriver}
+                >
+                  Seleccionar Piloto
                 </button>
               ) : null}
               <button
@@ -242,13 +321,22 @@ export const Championship = forwardRef((props, ref) => {
                 Crear nuevo Campeonato
               </button>
               {openFormNC ? (
-                <button
-                  type="Button"
-                  className="input-autocomplete"
-                  onClick={handleOpenFormNC}
-                >
-                  Cancelar
-                </button>
+                <>
+                  <button
+                    type="Button"
+                    className="input-autocomplete"
+                    onClick={handleOpenFormNC}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="Button"
+                    className="input-autocomplete"
+                    onClick={()=>console.log(dataSelected.driversSelected)}
+                  >
+                    test
+                  </button>
+                </>
               ) : null}
             </div>
             {openFormNC ? (
@@ -269,8 +357,8 @@ export const Championship = forwardRef((props, ref) => {
                     : " column1-schemma animation-left-to-right"
                 }
               >
-                {championships
-                  ? championships.map((result) => {
+                {data.AllChampionships
+                  ? data.AllChampionships.map((result) => {
                       return (
                         <button
                           className={
@@ -297,13 +385,13 @@ export const Championship = forwardRef((props, ref) => {
                   : " column1-schemma animation-left-to-right"
               }
             >
-              {dataTracks.map((result) => {
+              {data.AllTracks.map((result) => {
                 return (
                   <div className="track-chose-ch">
                     <div className="container-track-chos">
                       <button
                         className={
-                          !findTrack(tracksSelected, result)
+                          !findTrack(dataSelected.tracksSelected,result)
                             ? "input-autocomplete w-input-tracks btn-selected"
                             : "input-autocomplete w-input-tracks "
                         }
@@ -322,14 +410,14 @@ export const Championship = forwardRef((props, ref) => {
                   : " column1-schemma animation-right-to-left"
               }
             >
-              {dataScuderia.length > 0
-                ? dataScuderia.map((result) => {
+              {data.AllScuderias.length > 0
+                ? data.AllScuderias.map((result) => {
                     return (
                       <div className="track-chose-ch">
                         <div className="container-track-chos">
                           <button
                             className={
-                              !findTrack(scuderiasSelected, result)
+                              !findTrack(dataSelected.scuderiasSelected, result)
                                 ? "input-autocomplete w-input-tracks btn-selected "
                                 : "input-autocomplete w-input-tracks"
                             }
@@ -348,5 +436,12 @@ export const Championship = forwardRef((props, ref) => {
       return null;
     }
   };
-  return ContainerChampionship();
+  const HandleChangueLoading = () => {
+    if (data.AllScuderias && data.AllDrivers  && data.AllTracks) {
+      return ContainerChampionship();
+    } else {
+      return null;
+    }
+  };
+  return HandleChangueLoading();
 });

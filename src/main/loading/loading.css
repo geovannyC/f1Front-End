@@ -1,0 +1,22 @@
+.filter-loading {
+    /* background-color: khaki; */
+    /* filter: grayscale(100%); */
+    /* filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(86deg) brightness(10%) contrast(119%); */
+    transform: scale(1.1);
+    transition: 1000ms;
+}
+.filter-off{
+    filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(86deg) brightness(10%) contrast(119%);
+    transform: scale(1);
+    transition: 1000ms;
+}
+.container-loading{
+    background-color: rgba(46, 46, 46, 0.74);
+    display: flex;
+    z-index: 5;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}

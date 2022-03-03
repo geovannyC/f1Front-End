@@ -49,7 +49,7 @@ export const LoadingF = forwardRef((props, ref) => {
       <div
         className={
           open
-            ? `general-container loading index-3 solid-white`
+            ? `general-container loading solid-white`
             : "general-container index--1 close-card-driver solid-white"
         }
       >

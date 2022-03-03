@@ -10,6 +10,14 @@ import { getData } from "../../until/fetch";
 export const Table = forwardRef((props, ref) => {
   const [openC, setOpenC] = useState(false),
     [open, setOpen] = useState(false),
+    [data, setData] = useState({
+      tracksCh: false,
+      pointsPerTrack: false,
+      totalPointsDrivers: false,
+      scuderiasVitae: false,
+      totalPointsScuderias: false,
+      allDrivers: false,
+    }),
     [onMouseHoverTrack, setOnMouseHoverTrack] = useState({
       openWatchTB: false,
       openTrackSelected: false,
@@ -18,9 +26,9 @@ export const Table = forwardRef((props, ref) => {
       fastLap: false,
       driver: false,
       wallDriver: false,
+      records: false,
     }),
     [openScroll, setOpenScroll] = useState(false),
-    [allDrivers, setAllDrivers] = useState(false),
     [scuderias, setScuderias] = useState(false),
     [tracks, setTracks] = useState(false),
     [drivers, setDrivers] = useState(false),
@@ -35,103 +43,82 @@ export const Table = forwardRef((props, ref) => {
   };
   useImperativeHandle(ref, () => ({
     callFnHandleOpenTable(
-      paramScuderiasCh,
       paramTracksCh,
-      paramDriversCh,
-      paramDriversVitaeCh,
+      paramPointsPerTrack,
+      paramTotalPointsDriversCh,
+      paramTotalPointsScuderias,
       paramAllDrivers
+      // paramScuderiasCh,
+      // paramDriversCh,
+      // paramAllDrivers
     ) {
       handleOpen(
-        paramScuderiasCh,
         paramTracksCh,
-        paramDriversCh,
-        paramDriversVitaeCh,
+        paramPointsPerTrack,
+        paramTotalPointsDriversCh,
+        paramTotalPointsScuderias,
         paramAllDrivers
+        // paramScuderiasCh,
+        // paramDriversCh,
+        // paramDriversVitaeCh,
       );
     },
   }));
   const handleOpen = async (
-    paramScuderiasCh,
     paramTracksCh,
-    paramDriversCh,
-    paramDriversVitaeCh,
+    paramPointsPerTrack,
+    paramTotalPointsDriversCh,
+    paramTotalPointsScuderias,
     paramAllDrivers
   ) => {
     if (open) {
       setOpen(false);
       setOpenC(false);
-      setOnMouseHoverTrack({
-        openWatchTB: false,
-        openTrackSelected: false,
-        nameT: false,
-        wallpaper: false,
-        fastLap: false,
-        driver: false,
-      });
+      // setOnMouseHoverTrack({
+      //   openWatchTB: false,
+      //   openTrackSelected: false,
+      //   nameT: false,
+      //   wallpaper: false,
+      //   fastLap: false,
+      //   driver: false,
+      // });
       switchAction(false);
     } else {
-      setTotalPointsdrivers(paramDriversCh);
-      setDrivers(paramDriversVitaeCh);
-      setAllDrivers(paramAllDrivers);
-      setScuderias(paramScuderiasCh);
-      setTracks(paramTracksCh);
+      console.log(
+        paramPointsPerTrack[0].info,
+        paramPointsPerTrack[1].info,
+        paramPointsPerTrack[2].info
+      );
+      setData({
+        tracksCh: paramTracksCh,
+        pointsPerTrack: paramPointsPerTrack,
+        totalPointsDrivers: paramTotalPointsDriversCh,
+        totalPointsScuderias: paramTotalPointsScuderias,
+        allDrivers: paramAllDrivers,
+      });
       setOpen(true);
     }
   };
   const sortChampionShip = () => {
-    let arrToSort = totalPointsdrivers.sort((a, b) => {
-      const pointsA = parseInt(a.puntos);
-      const pointsB = parseInt(b.puntos);
-      const faultsA = parseInt(a.sanciones);
-      const faultsB = parseInt(b.sanciones);
-      const warningsA = parseInt(a.advertencias);
-      const warningsB = parseInt(b.advertencias);
-      let warningforCalcA = warningsA;
-      let warningforCalcB = warningsB;
-      let calcWarningsA =
-        warningforCalcA >= 3 ? parseInt((warningforCalcA /= 3)) * 5 : 0;
-      let calcWarningsB =
-        warningforCalcB >= 3 ? parseInt((warningforCalcB /= 3)) * 5 : 0;
-      let TotalA = pointsA - faultsA - calcWarningsA;
-      let TotalB = pointsB - faultsB - calcWarningsB;
-      return TotalB - TotalA;
+    let newData = [...data.totalPointsDrivers];
+    newData = newData.sort((a, b) => {
+      const pointsA = b.puntos;
+      const pointsB = a.puntos;
+      return pointsA - pointsB;
     });
-    setTotalPointsdrivers(arrToSort);
+
+    setData({ ...data, totalPointsDrivers: newData });
     forceUpdate();
   };
-  const totalPoints = (parampoints, paramfaults, paramwarnigs)=>{
-    const points = parseInt(parampoints?parampoints:0);
-    const faults = parseInt(paramfaults?paramfaults:0);
-    const warnings = parseInt(paramwarnigs?paramwarnigs:0);
-    let warningforCalc = warnings;
-    let calcWarnings =
-    warningforCalc >= 3 ? parseInt((warningforCalc /= 3)) * 5 : 0;
-    let Total = points - faults - calcWarnings;
-    return Total
-  }
   const sortChampionShipScuderias = () => {
-    let arrToSort = scuderias.sort((a, b) => {
-      let resultDriver1Scuderia1 = totalPointsdrivers.find((res) => {
-        return res.piloto._id === a.escuderia.piloto1;
-      });
-      let resultDriver2Scuderia1 = totalPointsdrivers.find((res) => {
-        return res.piloto._id === a.escuderia.piloto2;
-      });
-      let resultDriver1Scuderia2 = totalPointsdrivers.find((res) => {
-        return res.piloto._id === b.escuderia.piloto1;
-      });
-      let resultDriver2Scuderia2 = totalPointsdrivers.find((res) => {
-        return res.piloto._id === b.escuderia.piloto2;
-      });
-      const D1S1 = totalPoints(resultDriver1Scuderia1.puntos,resultDriver1Scuderia1.sanciones,resultDriver1Scuderia1.advertencias)
-      const D2S1 = totalPoints(resultDriver2Scuderia1.puntos,resultDriver2Scuderia1.sanciones,resultDriver2Scuderia1.advertencias)
-      const D1S2 = totalPoints(resultDriver1Scuderia2.puntos,resultDriver1Scuderia2.sanciones,resultDriver1Scuderia2.advertencias)
-      const D2S2 = totalPoints(resultDriver2Scuderia2.puntos,resultDriver2Scuderia2.sanciones,resultDriver2Scuderia2.advertencias)
-      const tScu1 = D1S1+D2S1
-      const tScu2 = D1S2+D2S2
-      return tScu2 - tScu1;
+    let newData = [...data.totalPointsScuderias];
+    newData = newData.sort((a, b) => {
+      const pointsA = b.puntos;
+      const pointsB = a.puntos;
+      return pointsA - pointsB;
     });
-    setScuderias(arrToSort);
+
+    setData({ ...data, totalPointsScuderias: newData });
     forceUpdate();
   };
   const forceUpdate = useForceUpdate();
@@ -148,21 +135,6 @@ export const Table = forwardRef((props, ref) => {
     forceUpdate();
   };
   const setDataWallBackground = async (result) => {
-    let thereAreDriver = !result.pista.piloto ? false : result.pista.piloto;
-    let driver = thereAreDriver
-      ? allDrivers.find((result) => {
-          return result._id === thereAreDriver;
-        })
-      : false;
-    let findWall = false;
-    if (driver) {
-      let url = `/getImagesPilots/${driver.carpetaPiloto}`;
-      await getData(url).then((response) => {
-        if (response) {
-          findWall = response;
-        }
-      });
-    }
     if (
       !onMouseHoverTrack.openWatchTB &&
       !onMouseHoverTrack.openTrackSelected
@@ -173,10 +145,12 @@ export const Table = forwardRef((props, ref) => {
         nameT: result.pista.nombre,
         wallpaper: result.pista.image,
         fastLap: result.pista.vuelta,
-        wallDriver: findWall,
-        driver: driver ? driver : false,
+        wallDriver: false,
+        records: result.pista.records,
+        // driver: driver ? driver : false,
       });
     }
+    forceUpdate();
   };
   const handleOpenScrollTbl = () => {
     if (!openScroll) {
@@ -197,7 +171,9 @@ export const Table = forwardRef((props, ref) => {
         fastLap: false,
         driver: false,
         openTrackSelected: false,
+        records: false,
       });
+      forceUpdate();
     }
   };
   const handleCloseTrackSelected = () => {
@@ -214,13 +190,14 @@ export const Table = forwardRef((props, ref) => {
     }
   };
   const selectTrack = async (result) => {
-    let thereAreDriver = !result.pista.piloto ? false : result.pista.piloto;
+    let thereAreDriver =
+      result.pista.records.length < 1 ? false : result.pista.records[0].piloto;
+    let findWall = false;
     let driver = thereAreDriver
-      ? allDrivers.find((result) => {
-          return result._id === thereAreDriver;
+      ? data.allDrivers.find((driverFinded) => {
+          return driverFinded._id === thereAreDriver;
         })
       : false;
-    let findWall = false;
     if (driver) {
       let url = `/getImagesPilots/${driver.carpetaPiloto}`;
       await getData(url).then((response) => {
@@ -231,21 +208,49 @@ export const Table = forwardRef((props, ref) => {
     }
     if (onMouseHoverTrack.openWatchTB && !onMouseHoverTrack.openTrackSelected) {
       setOnMouseHoverTrack({
+        ...onMouseHoverTrack,
         openWatchTB: true,
         openTrackSelected: true,
-        nameT: result.pista.nombre,
-        wallpaper: result.pista.image,
-        fastLap: result.pista.vuelta,
-        wallDriver: findWall,
         driver: driver ? driver : false,
+        wallDriver: findWall,
       });
     }
   };
-
-  const DataTrackSelected = () => {
-    let lap = onMouseHoverTrack.fastLap;
+  const SchemmaDFL = () => {
     let driver = onMouseHoverTrack.driver;
     let wall = onMouseHoverTrack.wallDriver;
+    if (onMouseHoverTrack.openTrackSelected) {
+      return (
+        <div className="data-track-column2">
+          <div className="aling-content-driver-fl">
+            <div
+              className="card-driver-fl"
+              onClick={() => switchAction(driver)}
+            >
+              <img src={wall} className="img-driver-fl" alt="" />
+            </div>
+          </div>
+          <div className="content-driver-fl">
+            <div className="content-column">
+              <small>
+                {driver.alias !== "false" ? driver.alias : driver.nombre}
+              </small>
+            </div>
+          </div>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  };
+  const DataTrackSelected = () => {
+    let recordsTrack;
+    if (onMouseHoverTrack.openWatchTB) {
+      recordsTrack =
+        onMouseHoverTrack.records.length > 5
+          ? onMouseHoverTrack.records.splice(0, 5)
+          : onMouseHoverTrack.records;
+    }
     return (
       <div
         className={
@@ -256,31 +261,22 @@ export const Table = forwardRef((props, ref) => {
       >
         <div className="grid-content-data-track">
           <div className="data-track-column1 grid-data-time-fl">
-            <div>Vuelta Rápida</div>
-            <div>{lap ? `${lap[0]} : ${lap[1]} : ${lap[2]}` : 0}</div>
+            <div>Vueltas Rápidas</div>
+            {recordsTrack
+              ? recordsTrack.map((recordDriver) => {
+                  let i = recordsTrack.indexOf(recordDriver);
+                  let forc = 1 / i;
+                  return (
+                    <>
+                      <div
+                        style={{ opacity: forc }}
+                      >{`${recordDriver.minuto}:${recordDriver.segundo}:${recordDriver.decima}`}</div>
+                    </>
+                  );
+                })
+              : null}
           </div>
-          <div className="data-track-column2 grid-data-driver-fl">
-            <div className="aling-content-driver-fl">
-              <div
-                className="card-driver-fl"
-                onClick={() => switchAction(driver)}
-              >
-                <img src={wall} className="img-driver-fl" alt="" />
-              </div>
-            </div>
-            <div>
-              <div className="content-driver-fl">
-                <div className="content-column content-start">
-                  <small>Nombre</small>
-                  <small>Alias</small>
-                </div>
-                <div className="content-column content-end">
-                  <small>{driver ? driver.nombre : null}</small>
-                  <small>{driver ? driver.alias : null}</small>
-                </div>
-              </div>
-            </div>
-          </div>
+          {SchemmaDFL()}
         </div>
       </div>
     );
@@ -335,16 +331,29 @@ export const Table = forwardRef((props, ref) => {
   const scrollUp = () => {
     startPosition.current.scrollIntoView({ behavior: "smooth" });
   };
-  const Points = (props) => {
-    const result = drivers.filter(
-      (element) => element.pistaCampeonato._id === props.track
-    );
-    const result2 = result.find(
-      (element) => element.piloto._id === props.idDriver
-    );
-    if (open) {
-      if (result && result2) {
-        return <td>{result2.puntos}</td>;
+  const filterPintes = ()=>{
+    return 
+  }
+  const Points = ({ idDriver, i, status }) => {
+    const pointsPT = data.pointsPerTrack;
+    if (open && data.pointsPerTrack) {
+      if (status && pointsPT[i].info) {
+        const result = pointsPT[i].info.filter((e) => {
+          if (!e.piloto) {
+            return 0;
+          } else {
+            return e.piloto._id === idDriver;
+          }
+        })[0];
+        if (result) {
+          return (
+            <td style={{ color: result.sanciones.length > 0 ? "red" : null }}>
+              {result.puntos}
+            </td>
+          );
+        } else {
+          return <td>-</td>;
+        }
       } else {
         return <td>-</td>;
       }
@@ -352,27 +361,25 @@ export const Table = forwardRef((props, ref) => {
       return null;
     }
   };
-  const FindDriverScuderia = (props) => {
-    let result = totalPointsdrivers.find((res) => {
-      return res.piloto._id === props.idDriver;
+  const FindDriverScuderia = ({ idDriver }) => {
+    let result = data.totalPointsDrivers.find((res) => {
+      return res.piloto._id === idDriver;
     });
-
+    let faults = result.sanciones;
+    let warnings = result.advertencias;
+    let buildPointsWarnings = parseInt(warnings / 3) * 5;
+    let totalPointsFaults = faults + buildPointsWarnings;
     if (result) {
       return (
         <>
           <td>{result.piloto.nombre}</td>
-          <td>{result.piloto.victorias ? result.piloto.victorias : 0}</td>
-          <PointsFaults tfaults={result.sanciones} />
-          <PointsWarnings twarnings={result.advertencias} />
-          <TPointsFaults
-            tfaults={result.sanciones ? result.sanciones : 0}
-            twarnings={result.advertencias ? result.advertencias : 0}
-          />
-          <PointsChampionship
-            tpoints={result.puntos ? result.puntos : 0}
-            tfaults={result.sanciones ? result.sanciones : 0}
-            twarnings={result.advertencias ? result.advertencias : 0}
-          />
+          <td style={{ color: faults > 0 ? "red" : null }}>{faults}</td>
+          <td style={{ color: warnings > 0 ? "red" : null }}>{warnings}</td>
+          {/* puntos totales sanciones */}
+          <td style={{ color: totalPointsFaults > 0 ? "red" : null }}>
+            {totalPointsFaults}
+          </td>
+          <td>{result.puntos}</td>
           {/* <td>{result.puntos ? result.puntos : 0}</td> */}
         </>
       );
@@ -380,19 +387,9 @@ export const Table = forwardRef((props, ref) => {
       return null;
     }
   };
-  const PointsChampionship = (props) => {
-    const points = parseInt(props.tpoints);
-    const faults = parseInt(props.tfaults);
-    const warnings = parseInt(props.twarnings);
-    let warningforCalc = warnings;
-    let calcWarnings =
-      warningforCalc >= 3 ? parseInt((warningforCalc /= 3)) * 5 : 0;
+  const PointsChampionship = ({ tpoints }) => {
     if (open) {
-      if (props.tpoints) {
-        return <td>{points - faults - calcWarnings}</td>;
-      } else {
-        return <td>-</td>;
-      }
+      return <td>{tpoints}</td>;
     } else {
       return null;
     }
@@ -421,53 +418,30 @@ export const Table = forwardRef((props, ref) => {
       return null;
     }
   };
-  const TPointsFaults = (props) => {
-    const faults = parseInt(props.tfaults);
-    const warnings = parseInt(props.twarnings);
-    let warningforCalc = warnings;
-    let calcWarnings =
-      warningforCalc >= 3 ? parseInt((warningforCalc /= 3)) * 5 : 0;
+  const TPointsFaults = ({ tfaults, twarnings }) => {
     if (open) {
-      if (calcWarnings || faults) {
-        return <td style={{ color: "red" }}>{calcWarnings + faults}</td>;
-      } else {
-        return <td>-</td>;
-      }
+      return <td style={{ color: "red" }}>{tfaults + twarnings}</td>;
     } else {
       return null;
     }
   };
-  const TConstructorsChampionship = (props)=>{
-    let result1 = totalPointsdrivers.find((res) => {
-      return res.piloto._id === props.idDriver1;
-    });
-    let result2 = totalPointsdrivers.find((res) => {
-      return res.piloto._id === props.idDriver2;
-    });
-    const pointsA = parseInt(result1.puntos?result1.puntos:0);
-    const pointsB = parseInt(result2.puntos?result2.puntos:0);
-    const faultsA = parseInt(result1.sanciones?result1.sanciones:0);
-    const faultsB = parseInt(result2.sanciones?result2.sanciones:0);
-    const warningsA = parseInt(result1.advertencias?result1.advertencias:0);
-    const warningsB = parseInt(result2.advertencias?result2.advertencias:0);
-    let warningforCalcA = warningsA;
-    let warningforCalcB = warningsB;
-    let calcWarningsA =
-      warningforCalcA >= 3 ? parseInt((warningforCalcA /= 3)) * 5 : 0;
-    let calcWarningsB =
-      warningforCalcB >= 3 ? parseInt((warningforCalcB /= 3)) * 5 : 0;
-    let TotalA = pointsA - faultsA - calcWarningsA;
-    let TotalB = pointsB - faultsB - calcWarningsB;
-    if (openC) {
-      if (TotalA || TotalB) {
-        return <td >{TotalA + TotalB}</td>;
-      } else {
-        return <td>-</td>;
-      }
-    } else {
-      return null;
-    }
-  }
+  const RowsScuderia = ({ scuderia }) => {
+    return (
+      <tr>
+        <td className="drivers">{scuderia.escuderia.nombreEscuderia}</td>
+        <FindDriverScuderia idDriver={scuderia.escuderia.piloto1} />
+        <FindDriverScuderia idDriver={scuderia.escuderia.piloto2} />
+        <td>
+          {/* victorias escuderia */}
+          {0}
+        </td>
+        {/* doblete escuderia */}
+        <td>{0}</td>
+        <td>{scuderia.puntos}</td>
+        {/* <td>{scuderia}</td> */}
+      </tr>
+    );
+  };
   const ChampionShipTable = () => {
     return (
       <div
@@ -475,7 +449,7 @@ export const Table = forwardRef((props, ref) => {
       >
         <div className="grid-table-scroll">
           <div className="listen-event-auto-scroll-table">
-            <div class="arrow-up" onMouseOver={scrollUp}></div>
+            {/* <div class="arrow-up" onMouseOver={scrollUp}></div> */}
           </div>
           <div
             className={openScroll ? "card-table open-scroll" : "card-table"}
@@ -486,8 +460,8 @@ export const Table = forwardRef((props, ref) => {
               <thead ref={startPosition}>
                 <tr>
                   <th>Nombre</th>
-                  {tracks
-                    ? tracks.map((result) => {
+                  {data.tracksCh
+                    ? data.tracksCh.map((result) => {
                         return (
                           <th
                             onMouseOver={() => setDataWallBackground(result)}
@@ -507,28 +481,25 @@ export const Table = forwardRef((props, ref) => {
                 </tr>
               </thead>
               <tbody>
-                {totalPointsdrivers
-                  ? totalPointsdrivers.map((result) => {
+                {data.totalPointsDrivers
+                  ? data.totalPointsDrivers.map((result) => {
                       return (
                         <tr>
-                          <td
-                            className="drivers"
-                            ref={
-                              result ===
-                              totalPointsdrivers[totalPointsdrivers.length - 1]
-                                ? endPosition
-                                : null
-                            }
-                          >
+                          <td className="drivers" ref={result}>
                             {result.piloto.nombre}
                           </td>
-                          {tracks
-                            ? tracks.map((response) => {
+                          {data.tracksCh
+                            ? data.tracksCh.map((response) => {
+                                let statusTrack =
+                                  typeof data.pointsPerTrack[
+                                    response.posicion
+                                  ] === "object";
                                 return (
                                   <>
                                     <Points
-                                      track={response.pista._id}
+                                      i={response.posicion}
                                       idDriver={result.piloto._id}
+                                      status={statusTrack}
                                     />
                                   </>
                                 );
@@ -538,18 +509,10 @@ export const Table = forwardRef((props, ref) => {
                           <PointsFaults tfaults={result.sanciones} />
                           <PointsWarnings twarnings={result.advertencias} />
                           <TPointsFaults
-                            tfaults={result.sanciones ? result.sanciones : 0}
-                            twarnings={
-                              result.advertencias ? result.advertencias : 0
-                            }
+                            tfaults={result.sanciones}
+                            twarnings={result.advertencias}
                           />
-                          <PointsChampionship
-                            tpoints={result.puntos ? result.puntos : 0}
-                            tfaults={result.sanciones ? result.sanciones : 0}
-                            twarnings={
-                              result.advertencias ? result.advertencias : 0
-                            }
-                          />
+                          <PointsChampionship tpoints={result.puntos} />
                           {/* {points[totalPointsdrivers.indexOf(result)]
                             ? points[totalPointsdrivers.indexOf(result)].map((points) => {
                                 return (
@@ -567,7 +530,7 @@ export const Table = forwardRef((props, ref) => {
             </table>
           </div>
           <div className="listen-event-auto-scroll-table">
-            <div class="arrow-down" onMouseOver={scrollDown}></div>
+            {/* <div class="arrow-down" onMouseOver={scrollDown}></div> */}
           </div>
         </div>
       </div>
@@ -584,13 +547,11 @@ export const Table = forwardRef((props, ref) => {
               <tr>
                 <th>Escuderia</th>
                 <th>Piloto 1</th>
-                <th>Victorias</th>
                 <th>San</th>
                 <th>Adv</th>
                 <th>T</th>
                 <th>Puntos P1</th>
                 <th>Piloto 2</th>
-                <th>Victorias</th>
                 <th>San</th>
                 <th>Adv</th>
                 <th>T</th>
@@ -601,30 +562,9 @@ export const Table = forwardRef((props, ref) => {
               </tr>
             </thead>
             <tbody>
-              {scuderias
-                ? scuderias.map((result) => {
-                    return (
-                      <tr>
-                        <td className="drivers">
-                          {result.escuderia.nombreEscuderia}
-                        </td>
-                        <FindDriverScuderia
-                          idDriver={result.escuderia.piloto1}
-                        />
-                        <FindDriverScuderia
-                          idDriver={result.escuderia.piloto2}
-                        />
-                        <td>
-                          {result.escuderia.victorias ? result.victorias : 0}
-                        </td>
-                        <td>{result.escuderia.doblete ? result.doblete : 0}</td>
-                        <TConstructorsChampionship
-                        idDriver1={result.escuderia.piloto1}
-                        idDriver2={result.escuderia.piloto2}
-                        />
-                        {/* <td>{result.puntos}</td> */}
-                      </tr>
-                    );
+              {data.totalPointsScuderias
+                ? data.totalPointsScuderias.map((result) => {
+                    return <RowsScuderia scuderia={result} />;
                   })
                 : null}
             </tbody>

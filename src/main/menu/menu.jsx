@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-export default function Menu(props) {
+export default function Menu({listmenu,optionMenu,step}) {
   const [open, setOpen] = useState(true),
     [loading, setLoading] = useState(true),
     [currentOption, setCurrentOption] = useState(false);
@@ -12,7 +12,7 @@ export default function Menu(props) {
       setOpen(false);
     } else {
       if (currentOption || currentOption === 0) {
-        props.optionMenu(currentOption, false);
+        optionMenu(currentOption, false);
         setCurrentOption(false);
       }
       setOpen(true);
@@ -30,11 +30,29 @@ export default function Menu(props) {
       </div>
     );
   };
-  const optionMenu = (event) => {
-    props.optionMenu(event.target.value);
+  const fnOptionMenu = (event) => {
+    optionMenu(event.target.value,true);
     setCurrentOption(event.target.value);
     handleChangeMenuOpen();
   };
+  const SchemmaListMenu = ()=>{
+    console.log()
+    if(listmenu){
+      return listmenu.map(element=>{
+        return (
+          <li onClick={fnOptionMenu} value={element.value} class="link">
+          {element.title}
+        </li>
+        )
+      })
+    }else{
+      return (
+        <li class="link">
+                Cargando
+              </li>
+      )
+    }
+  }
   const SchemmaMenu = () => {
     return (
       <div className={open ? "menu-wrapper menu-open" : "menu-wrapper"}>
@@ -44,54 +62,55 @@ export default function Menu(props) {
           }
         >
           <ul className="link-list">
-            {props.step > 5 ? (
-              <li onClick={optionMenu} value={0} class="link">
+            {SchemmaListMenu()}
+            {/* {step > 5 ? (
+              <li onClick={fnOptionMenu} value={0} class="link">
                 Ver Podium
               </li>
             ) : null}
-            {props.step > 5 ? (
-              <li onClick={optionMenu} value={1} class="link">
+            {step > 5 ? (
+              <li onClick={fnOptionMenu} value={1} class="link">
                 Tabla de Puntuaciones
               </li>
             ) : null}
-            {props.step > 4 &&props.step!==10? (
-              <li onClick={optionMenu} value={2} class="link">
+            {step > 4 &&step!==10? (
+              <li onClick={fnOptionMenu} value={2} class="link">
                 Registrar Puntuaciones
               </li>
             ) : null}
-            {props.step > 5 ? (
-              <li onClick={optionMenu} value={7} class="link">
+            {step > 5 ? (
+              <li onClick={fnOptionMenu} value={7} class="link">
                 Registrar Sanción
               </li>
             ) : null}
-            <li onClick={optionMenu} value={3}>
+            <li onClick={fnOptionMenu} value={3}>
               Registrar Pista
             </li>
-            {props.step > 1 ? (
-              <li onClick={optionMenu} value={4}  class="link">
+            {step > 1 ? (
+              <li onClick={fnOptionMenu} value={4}  class="link">
                 Registrar Piloto
               </li>
             ) : null}
-            {props.step > 2 ? (
-              <li onClick={optionMenu} value={5}  class="link">
+            {step > 2 ? (
+              <li onClick={fnOptionMenu} value={5}  class="link">
                 Registrar Scuderia
               </li>
             ) : null}
-            {props.step > 3 ? (
-              <li onClick={optionMenu} value={8}  class="link">
+            {step > 3 ? (
+              <li onClick={fnOptionMenu} value={8}  class="link">
                 Editar Scuderia
               </li>
             ) : null}
-            {props.step > 3 ? (
-              <li onClick={optionMenu} value={6}  class="link">
+            {step > 3 ? (
+              <li onClick={fnOptionMenu} value={6}  class="link">
                 Campeonatos
               </li>
             ) : null}
-            {props.step > 1 ? (
-              <li onClick={optionMenu} value={-1}  class="link">
+            {step > 1 ? (
+              <li onClick={fnOptionMenu} value={-1}  class="link">
                 Registrar Palabras Ondas
               </li>
-            ) : null}
+            ) : null} */}
           </ul>
         </div>
       </div>

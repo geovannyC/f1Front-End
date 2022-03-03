@@ -3,6 +3,7 @@ import React, {
   useImperativeHandle,
   forwardRef,
   useRef,
+  useReducer,
 } from "react";
 import useForceUpdate from "use-force-update";
 import { ChromePicker } from "react-color";
@@ -10,24 +11,40 @@ import logo from "../images/logo.jpg";
 import { InputAutocomplete } from "../input-autocomplete/inputAutoplete";
 import { getData } from "../../until/fetch";
 import { handleChangeValueInput } from "../find-text/findText";
-export const ScuderiaEditor = forwardRef((props, ref) => {
-  const [open, setOpen] = useState(false),
+export const ACTIONS = {
+  UPDATE: "UPDATE",
+  DELETE: "DELETE",
+};
+function reducer(state, action) {
+  switch (action.type) {
+    case ACTIONS.UPDATE:
+      let newState = [...state];
+      newState[action.payload.pos] = action.payload.data;
+      return newState;
+    case ACTIONS.DELETE:
+      let newStateDeleted = [...state];
+      newStateDeleted = initialStateSwitchColor;
+      return newStateDeleted;
+    default:
+      return state;
+  }
+}
+const initialStateSwitchColor = [false, false];
+export const ScuderiaEditor = forwardRef(({ callLoading }, ref) => {
+  const [open, setOpen] = useState({
+      open: false,
+      openD1Editor: false,
+      openD2Editor: false,
+    }),
     [selectScuderia, setSelectScuderia] = useState(false),
     [image, setImage] = useState(false),
     [folders, setFolders] = useState(false),
     [drivers, setDrivers] = useState(false),
     [wordFinded, setWordFinded] = useState("escuderia"),
-    [switchData, setSwitchData] = useState({
-      openPColor: false,
-      openSColor: false,
-      openD1Editor: false,
-      openD2Editor: false,
-      openNEEditor: false,
-    }),
-    [dataColor, setDataColor] = useState({
-      pColor: false,
-      sColor: false,
-    }),
+    [switchData, dispatchSwitchData] = useReducer(
+      reducer,
+      initialStateSwitchColor
+    ),
     [dataInput, setDataInput] = useState({
       driver1: "",
       driver2: "",
@@ -46,6 +63,19 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
       resolve(image);
     });
   };
+  const sendData = () => {
+    let url = "/update-scuderia";
+
+    let data = {
+      _id: wordFinded._id,
+      colors: {
+        pColor: switchData[0],
+        sColor: switchData[1],
+      },
+    };
+    console.log(data);
+    callLoading(data, url, "post");
+  };
   const chilrefIA = useRef();
   useImperativeHandle(ref, () => ({
     callFnHandleOpen(scuderiasCh, paramDrivers, paramFolders) {
@@ -54,35 +84,30 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
   }));
   const forceUpdate = useForceUpdate();
   const handleOpen = (scuderiasCh, paramDrivers, paramFolders) => {
-    if (open) {
-      setOpen(false);
+    if (open.open) {
+      setOpen({ ...open, open: false });
+      dispatchSwitchData({ type: ACTIONS.DELETE });
     } else {
-      setOpen(true);
+      setOpen({ ...open, open: true });
       setDrivers(paramDrivers);
       setFolders(paramFolders);
-      if (switchData.openD1Editor || switchData.openD2Editor) {
-      } else if (!selectScuderia) {
+      if (!selectScuderia) {
         chilrefIA.current.callFnHandleOpen(scuderiasCh, "nombreEscuderia");
       }
     }
-    open ? setOpen(false) : setOpen(true);
+    // const handleOpenIA = () => {
+    //   chilrefIA.current.callFnHandleOpen(drivers, "nombre", "alias");
   };
-  const handleOpenIA = () => {
-    chilrefIA.current.callFnHandleOpen(drivers, "nombre", "alias");
-  };
-  const handleChanguePColor = (paramcolor) => {
-    let stateColor = dataColor;
-    stateColor.pColor = paramcolor.hex;
-    setPColorStyle(paramcolor.hex);
-    setDataColor(stateColor);
-    forceUpdate();
-  };
-  const handleChangueSColor = (paramcolor) => {
-    let stateColor = dataColor;
-    stateColor.sColor = paramcolor.hex;
-    setSColorStyle(paramcolor.hex);
-    setDataColor(stateColor);
-    forceUpdate();
+  const handleChangueColor = (paramcolor, pos) => {
+    if (pos === 0) {
+      setPColorStyle(paramcolor.hex);
+    } else {
+      setSColorStyle(paramcolor.hex);
+    }
+    dispatchSwitchData({
+      type: ACTIONS.UPDATE,
+      payload: { data: paramcolor.hex, pos: pos },
+    });
   };
   const setPColorStyle = (newColor) => {
     document.documentElement.style.setProperty(
@@ -111,25 +136,32 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
   const handleOpenSelectScuderia = () => {
     if (selectScuderia) {
       setSelectScuderia(false);
-      setDataColor({
-        pColor: false,
-        sColor: false,
-      });
-      setSwitchData({
-        openPColor: false,
-        openSColor: false,
-        openD1Editor: false,
-        openD2Editor: false,
-      });
       setDataInput({
         driver1: false,
         driver2: false,
         scuderiaName: false,
         folderScuderia: false,
       });
-      setPColorStyle(getWhiteColor());
-      setSColorStyle(getBlackColor());
+
+      setWordFinded(false);
+      dispatchSwitchData({ type: ACTIONS.DELETE });
     } else {
+      let pColor = wordFinded.colors
+        ? wordFinded.colors.pColor
+        : getWhiteColor();
+      let sColor = wordFinded.colors
+        ? wordFinded.colors.sColor
+        : getBlackColor();
+      setPColorStyle(pColor);
+      setSColorStyle(sColor);
+      dispatchSwitchData({
+        type: ACTIONS.UPDATE,
+        payload: { data: pColor ? pColor : getWhiteColor(), pos: [0] },
+      });
+      dispatchSwitchData({
+        type: ACTIONS.UPDATE,
+        payload: { data: sColor ? sColor : getBlackColor(), pos: [1] },
+      });
       setSelectScuderia(true);
     }
   };
@@ -144,75 +176,74 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
     }
   };
   const onPressEnter = () => {
-    if (wordFinded && !selectScuderia) {
+    if (!selectScuderia) {
+      setWordFinded(wordFinded);
       handleOpenSelectScuderia();
     } else if (selectScuderia) {
-      let newWordFinded = wordFinded;
-      let newStatehSwitchData = switchData;
-      if (typeof switchData.openD1Editor === "object") {
-        newWordFinded.piloto1 = switchData.openD1Editor;
-        newStatehSwitchData.openD1Editor = false;
-      } else if (typeof switchData.openD2Editor === "object") {
-        newWordFinded.piloto2 = switchData.openD2Editor;
-        newStatehSwitchData.openD2Editor = false;
-      }
-      setSwitchData(newStatehSwitchData);
-      setWordFinded(newWordFinded);
-      forceUpdate();
+      return null;
+      // let newWordFinded = wordFinded;
+      // let newStatehSwitchData = switchData;
+      // if (typeof switchData.pColor === "string") {
+      //   newWordFinded.piloto1 = switchData.openD1Editor;
+      //   newStatehSwitchData.openD1Editor = false;
+      // } else if (typeof switchData.sColor === "string") {
+      //   newWordFinded.piloto2 = switchData.openD2Editor;
+      //   newStatehSwitchData.openD2Editor = false;
+      // }
+      // setSwitchData(newStatehSwitchData);
+      // setWordFinded(newWordFinded);
+      // forceUpdate();
     }
   };
-  const handleOpenColorPicker = (event) => {
-    let stateColor = switchData;
-    let id = event.target.id;
-    if (id === "primary") {
-      if (switchData.openPP) {
-        stateColor.openPColor = false;
-      } else {
-        stateColor.openPColor = true;
-      }
-    } else {
-      if (switchData.openSP) {
-        stateColor.openSColor = false;
-      } else {
-        stateColor.openSColor = true;
-      }
-    }
-    setSwitchData(stateColor);
-    forceUpdate();
-  };
+  // const handleOpenColorPicker = (event) => {
+  //   let stateColor = switchData;
+  //   let id = event.target.id;
+  //   if (id === "primary") {
+  //     if (switchData.openPP) {
+  //       stateColor.openPColor = false;
+  //     } else {
+  //       stateColor.openPColor = true;
+  //     }
+  //   } else {
+  //     if (switchData.openSP) {
+  //       stateColor.openSColor = false;
+  //     } else {
+  //       stateColor.openSColor = true;
+  //     }
+  //   }
+  //   setSwitchData(stateColor);
+  //   forceUpdate();
+  // };
   const handleOpenChangeDriver = (event) => {
-    let stateSwitch = switchData;
     let id = event.target.id;
     if (id === "driver1") {
-      if (switchData.openD1Editor) {
-        stateSwitch.openD1Editor = false;
+      if (open.openD1Editor) {
+        setOpen({ ...open, openD1Editor: false });
       } else {
-        stateSwitch.openD1Editor = true;
-        stateSwitch.openD2Editor = false;
-        handleOpenIA();
+        setOpen({ ...open, openD1Editor: true, openD2Editor: false });
+
+        // handleOpenIA();
       }
     } else {
-      if (switchData.openD2Editor) {
-        stateSwitch.openD2Editor = false;
+      if (open.openD2Editor) {
+        setOpen({ ...open, openD2Editor: false });
       } else {
-        stateSwitch.openD2Editor = true;
-        stateSwitch.openD1Editor = false;
-        handleOpenIA();
+        setOpen({ ...open, openD2Editor: true, openD1Editor: false });
+        // handleOpenIA();
       }
     }
-    setSwitchData(stateSwitch);
     forceUpdate();
   };
-  const handleOpenChangeNameScuderia = () => {
-    let stateSwitch = switchData;
-    if (stateSwitch.openNEEditor) {
-      stateSwitch.openNEEditor = false;
-    } else {
-      stateSwitch.openNEEditor = true;
-    }
-    setSwitchData(stateSwitch);
-    forceUpdate();
-  };
+  // const handleOpenChangeNameScuderia = () => {
+  //   let stateSwitch = switchData;
+  //   if (stateSwitch.openNEEditor) {
+  //     stateSwitch.openNEEditor = false;
+  //   } else {
+  //     stateSwitch.openNEEditor = true;
+  //   }
+  //   setSwitchData(stateSwitch);
+  //   forceUpdate();
+  // };
   const findLogo = async (txt) => {
     return new Promise(async (resolve) => {
       let image;
@@ -227,63 +258,63 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
       resolve(image);
     });
   };
-  const handleChangueInput = async (event) => {
-    let newValue = await formatWords(event.target.value);
-    let stateDataInput = dataInput;
-    let id = event.target.id;
-    let newWordFinded = wordFinded;
-    if (id === "scuderia-name") {
-      stateDataInput.scuderiaName = newValue;
-      wordFinded.nombreEscuderia = newValue;
-      setWordFinded(newWordFinded);
-    } else if (id === "driver1") {
-      stateDataInput.driver1 = newValue;
-    } else if (id === "driver2") {
-      stateDataInput.driver2 = newValue;
-    } else if (id === "folder-name") {
-      handleChangeValueInput(newValue, folders).then(async (folderFinded) => {
-        if (folderFinded) {
-          if (folderFinded.length === 1) {
-            if (folderFinded[0] !== image) {
-              await findLogo(folderFinded[0]).then((result) => {
-                if (result) {
-                  setImage(result);
-                }
-              });
-            }
-            newWordFinded.carpetaEscuderia = folderFinded[0];
-          }
-        }
-      });
-      stateDataInput.folderScuderia = newValue;
-      setWordFinded(newWordFinded);
-    }
-    setDataInput(stateDataInput);
-    forceUpdate();
-  };
-  const formatWords = (text) => {
-    return new Promise((resolve) => {
-      resolve(text.replace(/[^a-zA-Z ]/g, "").toLowerCase());
-    });
-  };
-  const fnCancel = async (event) => {
-    let stateDataInput = dataInput;
-    let id = event.target.id;
-    if (id === "scuderia-name") {
-      stateDataInput.scuderiaName = "";
-    } else if (id === "driver1") {
-      stateDataInput.driver1 = "";
-    } else if (id === "driver2") {
-      stateDataInput.driver2 = "";
-    } else if (id === "forlder-name") {
-      stateDataInput.folderScuderia = "";
-    }
-    setDataInput(stateDataInput);
-    handleOpenChangeDriver(event);
-    forceUpdate();
-  };
+  // const handleChangueInput = async (event) => {
+  //   let newValue = await formatWords(event.target.value);
+  //   let stateDataInput = dataInput;
+  //   let id = event.target.id;
+  //   let newWordFinded = wordFinded;
+  //   if (id === "scuderia-name") {
+  //     stateDataInput.scuderiaName = newValue;
+  //     wordFinded.nombreEscuderia = newValue;
+  //     setWordFinded(newWordFinded);
+  //   } else if (id === "driver1") {
+  //     stateDataInput.driver1 = newValue;
+  //   } else if (id === "driver2") {
+  //     stateDataInput.driver2 = newValue;
+  //   } else if (id === "folder-name") {
+  //     handleChangeValueInput(newValue, folders).then(async (folderFinded) => {
+  //       if (folderFinded) {
+  //         if (folderFinded.length === 1) {
+  //           if (folderFinded[0] !== image) {
+  //             await findLogo(folderFinded[0]).then((result) => {
+  //               if (result) {
+  //                 setImage(result);
+  //               }
+  //             });
+  //           }
+  //           newWordFinded.carpetaEscuderia = folderFinded[0];
+  //         }
+  //       }
+  //     });
+  //     stateDataInput.folderScuderia = newValue;
+  //     setWordFinded(newWordFinded);
+  //   }
+  //   setDataInput(stateDataInput);
+  //   forceUpdate();
+  // };
+  // const formatWords = (text) => {
+  //   return new Promise((resolve) => {
+  //     resolve(text.replace(/[^a-zA-Z ]/g, "").toLowerCase());
+  //   });
+  // };
+  // const fnCancel = async (event) => {
+  //   let stateDataInput = dataInput;
+  //   let id = event.target.id;
+  //   if (id === "scuderia-name") {
+  //     stateDataInput.scuderiaName = "";
+  //   } else if (id === "driver1") {
+  //     stateDataInput.driver1 = "";
+  //   } else if (id === "driver2") {
+  //     stateDataInput.driver2 = "";
+  //   } else if (id === "forlder-name") {
+  //     stateDataInput.folderScuderia = "";
+  //   }
+  //   setDataInput(stateDataInput);
+  //   handleOpenChangeDriver(event);
+  //   forceUpdate();
+  // };
   const resultSearch = async (result) => {
-    let stateSwitch = switchData;
+    // let stateSwitch = switchData;
     if (!selectScuderia) {
       if (result) {
         await findImage(result.carpetaEscuderia).then((resultImg) => {
@@ -296,72 +327,88 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
         setWordFinded(false);
       }
     } else {
-      if (result) {
-        if (switchData.openD1Editor) {
-          stateSwitch.openD1Editor = result;
-        } else {
-          switchData.openD2Editor = result;
-        }
-        setSwitchData(stateSwitch);
-        forceUpdate();
-      }
+      return null;
+      // if (result) {
+      //   if (switchData.openD1Editor) {
+      //     stateSwitch.openD1Editor = result;
+      //   } else {
+      //     switchData.openD2Editor = result;
+      //   }
+      //   setSwitchData(stateSwitch);
+      //   forceUpdate();
+      // }
     }
   };
   const PrimaryColorPicker = () => {
-    if (!switchData.openD2Editor) {
-      if (switchData.openPColor) {
-        return (
-          <div className="container-color-picker">
-            <ChromePicker
-              color={dataColor.pColor}
-              onChangeComplete={handleChanguePColor}
-            />
-          </div>
-        );
-      } else {
-        return (
-          <button
-            className="input-autocomplete"
-            id="primary"
-            onClick={handleOpenColorPicker}
-            value="Color Primario"
+    if (open.openD1Editor) {
+      // if (switchData.openPColor) {
+      return (
+        <div className="container-color-picker">
+          <ChromePicker
+            color={switchData[0]}
+            onChangeComplete={(e) => {
+              handleChangueColor(e, 0);
+            }}
           />
-        );
-      }
+        </div>
+      );
+      // }
+      // else {
+      //   return (
+      //     <button
+      //       className="input-autocomplete"
+      //       id="primary"
+      //       onClick={handleOpenColorPicker}
+      //       value="Color Primario"
+      //     />
+      //   );
+      // }
     } else {
       return null;
     }
   };
   const SecondaryColorPicker = () => {
-    if (!switchData.openD1Editor) {
-      if (switchData.openSColor) {
-        return (
-          <div className="container-color-picker">
-            <ChromePicker
-              color={dataColor.sColor}
-              onChangeComplete={handleChangueSColor}
-            />
-          </div>
-        );
-      } else {
-        return (
-          <button
-            className="input-autocomplete"
-            id="secondary"
-            onClick={handleOpenColorPicker}
-            value="Color Secundario"
+    // if (!switchData.openD1Editor) {
+    if (open.openD2Editor) {
+      return (
+        <div className="container-color-picker">
+          <ChromePicker
+            color={switchData[1]}
+            onChangeComplete={(e) => {
+              handleChangueColor(e, 1);
+            }}
           />
-        );
-      }
+        </div>
+      );
+      // } else {
+      //   return (
+      //     <button
+      //       className="input-autocomplete"
+      //       id="secondary"
+      //       onClick={handleOpenColorPicker}
+      //       value="Color Secundario"
+      //     />
+      //   );
+      // }
     } else {
       return null;
+    }
+  };
+  const checkChangesColor = () => {
+    if (
+      switchData[0] !== getWhiteColor() ||
+      switchData[1] !== getBlackColor()
+    ) {
+      return true;
+    } else {
+      return false;
     }
   };
   const FnInputAutocomplete = () => {
     return (
       <div
         className={
-          !selectScuderia && open
+          !selectScuderia && open.open
             ? "animation-left-to-right-open container-r-drivers"
             : "animation-left-to-right container-r-drivers"
         }
@@ -387,14 +434,14 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
     return (
       <div
         className={
-          selectScuderia && open
+          selectScuderia && open.open
             ? "general-container index--1  animation-up-to-down-open animation-right-left-20-open"
             : "general-container index--1 animation-up-to-down animation-right-left-20"
         }
       >
         <div
           className={
-            selectScuderia && open
+            selectScuderia && open.open
               ? "container-back-logo  animation-up-to-down-open animation-right-left-20-open"
               : "container-back-logo animation-up-to-down animation-right-left-20"
           }
@@ -416,7 +463,7 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
       return (
         <div
           className={
-            selectScuderia && open
+            selectScuderia && open.open
               ? "animation-left-to-right-open container-r-drivers"
               : "animation-left-to-right container-r-drivers"
           }
@@ -425,23 +472,23 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
             <div className="container-ed-driver1 linear-grandient-right-pcolor-transparent">
               <div
                 className={
-                  switchData.openD1Editor
+                  open.openD1Editor
                     ? "animation-left-to-right-open general-container-2"
                     : "animation-left-to-right general-container-2"
                 }
               >
-                <div className="content-column container-back-content">
+                {/* <div className="content-column container-back-content">
                   <small className="text-ed">
                     {typeof switchData.openD1Editor === "object"
                       ? switchData.openD1Editor.nombre
                       : null}
-                  </small>
-                  <InputAutocomplete
+                  </small> */}
+                {/* <InputAutocomplete
                     ref={chilrefIA}
-                    // resultSearch={resultSearch}
-                    // onPressEnter={onPressEnter}
-                  />
-                  {/* <input
+                    resultSearch={resultSearch}
+                    onPressEnter={onPressEnter}
+                  /> */}
+                {/* <input
                     className="input-autocomplete"
                     type="text"
                     value={!dataInput.driver1 ? "" : dataInput.driver1}
@@ -451,18 +498,18 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
                       addProgress(e);
                     }}
                   /> */}
-                  <button
+                {/* <button
                     className="input-autocomplete "
                     id="driver1"
                     onClick={fnCancel}
                     value="cancelar"
-                  />
-                </div>
+                  /> */}
+                {/* </div> */}
               </div>
 
               <div
                 className={
-                  !switchData.openD1Editor
+                  !open.openD1Editor
                     ? "animation-left-to-right-open general-container-2"
                     : "animation-left-to-right general-container-2"
                 }
@@ -470,7 +517,7 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
                 <small
                   className="text-ed"
                   id="driver1"
-                  // onClick={handleOpenChangeDriver}
+                  onClick={handleOpenChangeDriver}
                 >
                   {!dataInput.driver1 || dataInput.driver1.lenght === 0
                     ? wordFinded.piloto1.nombre
@@ -492,46 +539,46 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
       return (
         <div
           className={
-            selectScuderia && open
+            selectScuderia && open.open
               ? "animation-right-to-leftt-open container-r-drivers"
               : "animation-right-to-left container-r-drivers"
           }
         >
           <div className=" grid-two-columns-30-70">
             <div className="container-r-drivers ">{SecondaryColorPicker()}</div>
-            <div className="container-driver2">
+            <div className="container-driver2 ">
               <div className=" container-ed-driver2 linear-grandient-left-pcolor-transparent">
                 <div
                   className={
-                    switchData.openD2Editor
+                    open.openD2Editor
                       ? "animation-right-to-leftt-open general-container-2"
                       : "animation-right-to-left general-container-2"
                   }
                 >
-                  <div className="content-column container-back-content">
+                  {/* <div className="content-column container-back-content">
                     <small className="text-ed">
                       {typeof switchData.openD2Editor === "object"
                         ? switchData.openD2Editor.nombre
                         : null}
-                    </small>
-                    <InputAutocomplete
+                    </small> */}
+                  {/* <InputAutocomplete
                       ref={chilrefIA}
-                      // resultSearch={resultSearch}
-                      // onPressEnter={onPressEnter}
-                    />
-                    <button
+                      resultSearch={resultSearch}
+                      onPressEnter={onPressEnter}
+                    /> */}
+                  {/* <button
                       type="text"
                       className="input-autocomplete "
                       id="driver2"
                       onClick={fnCancel}
                       value="Cancelar"
-                    />
-                  </div>
+                    /> */}
+                  {/* </div> */}
                 </div>
 
                 <div
                   className={
-                    !switchData.openD2Editor
+                    !open.openD2Editor
                       ? "animation-right-to-leftt-open "
                       : "animation-right-to-left "
                   }
@@ -539,7 +586,7 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
                   <small
                     className="text-ed"
                     id="driver2"
-                    // onClick={handleOpenChangeDriver}
+                    onClick={handleOpenChangeDriver}
                   >
                     {!dataInput.driver2 || dataInput.driver2.lenght === 0
                       ? wordFinded.piloto2.nombre
@@ -561,7 +608,7 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
       <>
         <div
           className={
-            open && selectScuderia && switchData.openNEEditor
+            open.open && selectScuderia && switchData.openNEEditor
               ? "animation-left-to-right-open container-fixed"
               : "animation-left-to-right container-fixed "
           }
@@ -569,7 +616,7 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
           <div className="container-back-content">
             <div className="timer-container">
               <div className="container-back-content">
-                <input
+                {/* <input
                   className="input-autocomplete "
                   id="scuderia-name"
                   value={!dataInput.scuderiaName ? "" : dataInput.scuderiaName}
@@ -578,11 +625,11 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
                   onKeyPress={(e) => {
                     addProgress(e);
                   }}
-                />
+                /> */}
                 <p class="helper helper1">{wordFinded.nombreEscuderia}</p>
               </div>
-              <div className="container-back-content">
-                <input
+              {/* <div className="container-back-content"> */}
+              {/* <input
                   className="input-autocomplete "
                   type="text"
                   id="folder-name"
@@ -593,35 +640,39 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
                   onKeyPress={(e) => {
                     addProgress(e);
                   }}
-                />
-                <p class="helper helper1">{wordFinded.carpetaEscuderia}</p>
-              </div>
-              <div className="container-back-content">
+                /> */}
+              {/* <p class="helper helper1">{wordFinded.carpetaEscuderia}</p> */}
+              {/* </div> */}
+              {/* <div className="container-back-content">
                 <button
                   type="submit"
                   className="input-autocomplete "
-                  onClick={handleOpenChangeNameScuderia}
-                  value="Cancelar"
-                />
-              </div>
+                  value="Aceptar"
+                >
+                  ACEPTAR
+                </button>
+              </div> */}
             </div>
           </div>
         </div>
         <div
           className={
-            open && selectScuderia && !switchData.openNEEditor
+            open.open && switchData[0] && switchData[1]
               ? "animation-left-to-right-open container-fixed"
               : "animation-left-to-right container-fixed "
           }
         >
-          <div className="aling-items-row">
-            <button
-              type="submit"
-              className="input-autocomplete"
-              onClick={handleOpenSelectScuderia}
-              value="Cancelar"
-            />
-          </div>
+          {checkChangesColor() ? (
+            <div className="aling-items-row">
+              <button
+                type="submit"
+                className="input-autocomplete"
+                onClick={sendData}
+              >
+                ACEPTAR
+              </button>
+            </div>
+          ) : null}
         </div>
         <div>{ContentBackLetters()}</div>
       </>
@@ -631,7 +682,7 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
     return (
       <div
         className={
-          selectScuderia && open
+          selectScuderia && open.open
             ? "animation-left-to-right-open container-r-drivers"
             : "animation-left-to-right container-r-drivers"
         }
@@ -649,7 +700,7 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
       return (
         <div
           className={
-            open
+            open.open
               ? "container-back-content animation-right-to-leftt-open"
               : "animation-right-to-left container-back-content"
           }
@@ -662,7 +713,7 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
             }
           >
             <small
-              // onClick={handleOpenChangeNameScuderia}
+              onClick={handleOpenSelectScuderia}
               value={dataInput.scuderiaName}
             >
               {wordFinded.nombreEscuderia}
@@ -678,7 +729,7 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
     return (
       <div
         className={
-          open && !selectScuderia
+          open.open && !selectScuderia
             ? "container-back-content animation-right-to-leftt-open index--1"
             : "animation-right-to-left container-back-content index--1"
         }
@@ -703,12 +754,12 @@ export const ScuderiaEditor = forwardRef((props, ref) => {
     return (
       <div
         className={
-          open ? "general-container index-1" : "general-container index-0"
+          open.open ? "general-container index-1" : "general-container index-0"
         }
       >
         <div
           className={
-            open
+            open.open
               ? "animation-right-to-leftt-open container-r-drivers"
               : "animation-right-to-left container-r-drivers"
           }

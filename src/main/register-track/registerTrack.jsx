@@ -88,7 +88,7 @@ export const RegisterTrack = forwardRef((props, ref) => {
             onChange={handleChangeInformation}
           />
           <small className="secondary-color">Imagen</small>
-          <label for="file-upload" class="input-autocomplete file">
+          <label for="file-upload" className="input-autocomplete file">
             Subir Imagen
           </label>
           <input
